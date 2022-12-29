@@ -25,14 +25,28 @@ WS2812Serial leds(NUMPIXELS, displayMemory, drawingMemory, LEDPIN, WS2812_GRB);
 #include <SerialFlash.h>
 
 // GUItool: begin automatically generated code
-AudioInputAnalog adc1;       // xy=706,445
-AudioInputI2S i2s1;          // xy=708,340
-AudioAmplifier amp1;         // xy=858,446
-AudioAnalyzePeak peak1;      // xy=1052,412
-AudioAnalyzeFFT256 fft256_1; // xy=1054,483
-AudioConnection patchCord1(adc1, amp1);
-AudioConnection patchCord2(amp1, fft256_1);
-AudioConnection patchCord3(amp1, peak1);
+AudioInputAnalog         adc1;           //xy=706,445
+AudioInputI2S            i2s1;           //xy=708,340
+AudioAmplifier           amp1;           //xy=850,445
+AudioFilterFIR           fir3;           //xy=1093,607
+AudioFilterFIR           fir4;           //xy=1095,652
+AudioFilterFIR           fir2;           //xy=1097,562
+AudioFilterFIR           fir1;           //xy=1098,514
+AudioAnalyzePeak         peak4;          //xy=1272,608
+AudioAnalyzePeak         peak5;          //xy=1273,652
+AudioAnalyzePeak         peak3;          //xy=1275,563
+AudioAnalyzePeak         peak2;          //xy=1276,514
+AudioAnalyzePeak         peak1;          //xy=1278,447
+AudioConnection          patchCord1(adc1, amp1);
+AudioConnection          patchCord2(amp1, peak1);
+AudioConnection          patchCord3(amp1, fir1);
+AudioConnection          patchCord4(amp1, fir2);
+AudioConnection          patchCord5(amp1, fir3);
+AudioConnection          patchCord6(amp1, fir4);
+AudioConnection          patchCord7(fir3, peak4);
+AudioConnection          patchCord8(fir4, peak5);
+AudioConnection          patchCord9(fir2, peak3);
+AudioConnection          patchCord10(fir1, peak2);
 // GUItool: end automatically generated code
 
 float bin1 = 0.0;
@@ -48,7 +62,6 @@ void setup()
 {
     AudioMemory(1024);
     amp1.gain(gain);
-    fft256_1.averageTogether(5);
 
     leds.begin();
 
@@ -96,14 +109,14 @@ void adjust_gain(void)
 void run_animation(void)
 {
     float peak = bin1;
-    if (fft256_1.available())
+    if (peak1.available())
     {
         // for (int i = 0; i < 15; i++)
         //{
         //     Serial.print(fft256_1.read(i));
         //     Serial.print("\t");
         // }
-        peak = fft256_1.read(0, 1); // 0,1 as range
+        peak = peak1.read(); // 0,1 as range
     }
 
     Serial.print(peak);
