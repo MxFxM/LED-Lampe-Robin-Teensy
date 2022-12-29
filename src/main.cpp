@@ -109,7 +109,7 @@ void adjust_gain(void) {
         gain = MINIMUM_GAIN;
     }
 
-    printFloat(gain);
+    // printFloat(gain);
 
     // set the new gain value for the next loop
     amp.gain(gain);
@@ -131,9 +131,9 @@ void update_peaks(void) {
 
     // same for fft values
     if (fft256.available()) {
-        peak_low = fft256.read(0, 1); // roughly 0 to 340 Hz
-        peak_med = fft256.read(2, 6); // roughly 340 Hz to 1020 Hz
-        peak_high = fft256.read(7, 60); // roughly 1020 Hz to 10k2 Hz
+        peak_low = fft256.read(0); // roughly 0 to 170 Hz
+        peak_med = fft256.read(1, 10); // roughly 170 Hz to 1700 Hz
+        peak_high = fft256.read(11, 60); // roughly 1700 Hz to 10k2 Hz
     }
 
     // decay gain value
@@ -172,7 +172,7 @@ void update_peaks(void) {
         bin_high = bin_high - BEAT_DECAY; // decrease the peak slowly
     }
 
-    printFloat(bin_all);
+    //printFloat(bin_all);
     printFloat(bin_low);
     printFloat(bin_med);
     printFloat(bin_high);
