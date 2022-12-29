@@ -49,7 +49,11 @@ AudioConnection          patchCord9(fir_low, peak_low);
 AudioConnection          patchCord10(fir_medlow, peak_medlow);
 // GUItool: end automatically generated code
 
-float bin1 = 0.0;
+float bin_all = 0.0;
+float bin_low = 0.0;
+float bin_medlow = 0.0;
+float bin_med = 0.0;
+float bin_high = 0.0;
 float gain = 1.0;
 float hue = 0.0;
 
@@ -61,7 +65,7 @@ void adjust_gain(void);
 void setup()
 {
     AudioMemory(1024);
-    amp1.gain(gain);
+    amp.gain(gain);
 
     leds.begin();
 
@@ -80,12 +84,12 @@ void loop()
 
 void adjust_gain(void)
 {
-    if (bin1 > 0.6)
+    if (bin_all > 0.6)
     {
         gain -= 0.1;
     }
 
-    if (bin1 < 0.3)
+    if (bin_all < 0.3)
     {
         gain += 0.05;
     }
@@ -103,38 +107,33 @@ void adjust_gain(void)
     Serial.print(gain);
     Serial.print("\t");
 
-    amp1.gain(gain);
+    amp.gain(gain);
 }
 
 void run_animation(void)
 {
-    float peak = bin1;
-    if (peak1.available())
+    float peak = bin_all;
+    if (peak_all.available())
     {
-        // for (int i = 0; i < 15; i++)
-        //{
-        //     Serial.print(fft256_1.read(i));
-        //     Serial.print("\t");
-        // }
-        peak = peak1.read(); // 0,1 as range
+        peak = peak_all.read(); // 0,1 as range
     }
 
     Serial.print(peak);
     Serial.print("\t");
 
-    if (peak > bin1)
+    if (peak > bin_all)
     {
-        bin1 = peak;
+        bin_all = peak;
     }
     else
     {
-        bin1 = bin1 - BEAT_DECAY;
+        bin_all = bin_all - BEAT_DECAY;
     }
 
-    Serial.print(bin1);
+    Serial.print(bin_all);
     Serial.print("\t");
 
-    int turnonnr = map(bin1, 0.2, 0.8, 0, NUMPIXELS);
+    int turnonnr = map(bin_all, 0.2, 0.8, 0, NUMPIXELS);
     if (turnonnr > NUMPIXELS)
     {
         turnonnr = NUMPIXELS;
