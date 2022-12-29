@@ -2,6 +2,8 @@
 
 #include <color.h>
 
+#define DEBUG_PRINTS true
+
 #define MINIMUM_GAIN 0.5
 #define MAXIMUM_GAIN 70.0
 #define BEAT_DECAY 0.05
@@ -59,6 +61,8 @@ float hue = 0.0;
 
 RgbColor ledarray[NUMPIXELS];
 
+void printFloat(float value);
+
 void update_peaks(void);
 void run_animation(void);
 void adjust_gain(void);
@@ -70,8 +74,10 @@ void setup()
 
     leds.begin();
 
+    #ifdef DEBUG_PRINTS
     Serial.begin(115200);
     Serial.println("Hey");
+    #endif
 }
 
 void loop()
@@ -80,8 +86,18 @@ void loop()
     run_animation();
     adjust_gain();
 
+    #ifdef DEBUG_PRINTS
     Serial.println();
+    #endif
+
     delay(10);
+}
+
+void printFloat(float value) {
+    #ifdef DEBUG_PRINTS
+    Serial.print(value);
+    Serial.print("\t");
+    #endif
 }
 
 void adjust_gain(void)
@@ -106,8 +122,7 @@ void adjust_gain(void)
         gain = MINIMUM_GAIN;
     }
 
-    Serial.print(gain);
-    Serial.print("\t");
+    printFloat(gain);
 
     amp.gain(gain);
 }
@@ -119,8 +134,7 @@ void update_peaks(void) {
         peak = peak_all.read(); // 0,1 as range
     }
 
-    Serial.print(peak);
-    Serial.print("\t");
+    printFloat(peak);
 
     if (peak > bin_all)
     {
@@ -131,8 +145,7 @@ void update_peaks(void) {
         bin_all = bin_all - BEAT_DECAY;
     }
 
-    Serial.print(bin_all);
-    Serial.print("\t");
+    printFloat(bin_all);
 }
 
 void run_animation(void)
@@ -159,8 +172,7 @@ void run_animation(void)
 
     RgbColor rgbcol = HsvToRgb(hsvcol);
 
-    Serial.print(turnonnr);
-    Serial.print("\t");
+    printFloat(turnonnr);
 
     for (int i = 0; i < NUMPIXELS; i++)
     {
@@ -192,16 +204,13 @@ void run_animation(void)
 
     for (int i = 0; i < turnonnr; i++)
     {
-        // leds.setPixel(i, rgbcol.r, rgbcol.g, rgbcol.b);
         ledarray[i] = rgbcol;
     }
-    // for (int i = turnonnr; i < NUMPIXELS; i++)
-    //{
-    //     leds.setPixel(i, 0x000000); // off
-    // }
+
     for (int i = 0; i < NUMPIXELS; i++)
     {
         leds.setPixel(i, ledarray[i].r, ledarray[i].g, ledarray[i].b);
     }
+
     leds.show();
 }
