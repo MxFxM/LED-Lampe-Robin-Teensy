@@ -59,6 +59,7 @@ float hue = 0.0;
 
 RgbColor ledarray[NUMPIXELS];
 
+void update_peaks(void);
 void run_animation(void);
 void adjust_gain(void);
 
@@ -75,6 +76,7 @@ void setup()
 
 void loop()
 {
+    update_peaks();
     run_animation();
     adjust_gain();
 
@@ -110,8 +112,7 @@ void adjust_gain(void)
     amp.gain(gain);
 }
 
-void run_animation(void)
-{
+void update_peaks(void) {
     float peak = bin_all;
     if (peak_all.available())
     {
@@ -132,7 +133,10 @@ void run_animation(void)
 
     Serial.print(bin_all);
     Serial.print("\t");
+}
 
+void run_animation(void)
+{
     int turnonnr = map(bin_all, 0.2, 0.8, 0, NUMPIXELS);
     if (turnonnr > NUMPIXELS)
     {
