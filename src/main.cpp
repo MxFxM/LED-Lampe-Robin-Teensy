@@ -1,7 +1,6 @@
 #include <Arduino.h>
 
 #include <color.h>
-#include <filter_tabs.h>
 
 #define DEBUG_PRINTS true
 
@@ -31,25 +30,11 @@ WS2812Serial leds(NUMPIXELS, displayMemory, drawingMemory, LEDPIN, WS2812_GRB);
 AudioInputAnalog         adc;           //xy=706,445
 AudioInputI2S            i2s_timer;           //xy=708,340
 AudioAmplifier           amp;           //xy=858,445
-AudioFilterFIR           fir_med;           //xy=1093,607
-AudioFilterFIR           fir_high;           //xy=1095,652
-AudioFilterFIR           fir_low;           //xy=1098,514
-AudioFilterFIR           fir_medlow;           //xy=1106,562
-AudioAnalyzePeak         peak_low;          //xy=1276,514
+AudioAnalyzeFFT256       fft256;       //xy=1061,529
 AudioAnalyzePeak         peak_all;          //xy=1278,447
-AudioAnalyzePeak         peak_high;          //xy=1278,650
-AudioAnalyzePeak         peak_med;          //xy=1279,608
-AudioAnalyzePeak         peak_medlow;          //xy=1292,563
 AudioConnection          patchCord1(adc, amp);
 AudioConnection          patchCord2(amp, peak_all);
-AudioConnection          patchCord3(amp, fir_low);
-AudioConnection          patchCord4(amp, fir_medlow);
-AudioConnection          patchCord5(amp, fir_med);
-AudioConnection          patchCord6(amp, fir_high);
-AudioConnection          patchCord7(fir_med, peak_med);
-AudioConnection          patchCord8(fir_high, peak_high);
-AudioConnection          patchCord9(fir_low, peak_low);
-AudioConnection          patchCord10(fir_medlow, peak_medlow);
+AudioConnection          patchCord3(amp, fft256);
 // GUItool: end automatically generated code
 
 float bin_all = 0.0;
@@ -73,6 +58,7 @@ void setup()
     // setup audio nodes
     AudioMemory(1024); // memory reserved
     amp.gain(gain); // starting gain for automatic adjustment
+    fft256.averageTogether(5); // with roughly 300 values per second, this still updates 60 times per second
 
     // setup ws2812b leds
     leds.begin(); // begin serial driver
