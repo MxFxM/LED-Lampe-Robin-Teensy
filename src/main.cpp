@@ -25,28 +25,28 @@ WS2812Serial leds(NUMPIXELS, displayMemory, drawingMemory, LEDPIN, WS2812_GRB);
 #include <SerialFlash.h>
 
 // GUItool: begin automatically generated code
-AudioInputAnalog         adc1;           //xy=706,445
-AudioInputI2S            i2s1;           //xy=708,340
-AudioAmplifier           amp1;           //xy=850,445
-AudioFilterFIR           fir3;           //xy=1093,607
-AudioFilterFIR           fir4;           //xy=1095,652
-AudioFilterFIR           fir2;           //xy=1097,562
-AudioFilterFIR           fir1;           //xy=1098,514
-AudioAnalyzePeak         peak4;          //xy=1272,608
-AudioAnalyzePeak         peak5;          //xy=1273,652
-AudioAnalyzePeak         peak3;          //xy=1275,563
-AudioAnalyzePeak         peak2;          //xy=1276,514
-AudioAnalyzePeak         peak1;          //xy=1278,447
-AudioConnection          patchCord1(adc1, amp1);
-AudioConnection          patchCord2(amp1, peak1);
-AudioConnection          patchCord3(amp1, fir1);
-AudioConnection          patchCord4(amp1, fir2);
-AudioConnection          patchCord5(amp1, fir3);
-AudioConnection          patchCord6(amp1, fir4);
-AudioConnection          patchCord7(fir3, peak4);
-AudioConnection          patchCord8(fir4, peak5);
-AudioConnection          patchCord9(fir2, peak3);
-AudioConnection          patchCord10(fir1, peak2);
+AudioInputAnalog         adc;           //xy=706,445
+AudioInputI2S            i2s_timer;           //xy=708,340
+AudioAmplifier           amp;           //xy=858,445
+AudioFilterFIR           fir_med;           //xy=1093,607
+AudioFilterFIR           fir_high;           //xy=1095,652
+AudioFilterFIR           fir_low;           //xy=1098,514
+AudioFilterFIR           fir_medlow;           //xy=1106,562
+AudioAnalyzePeak         peak_low;          //xy=1276,514
+AudioAnalyzePeak         peak_all;          //xy=1278,447
+AudioAnalyzePeak         peak_high;          //xy=1278,650
+AudioAnalyzePeak         peak_med;          //xy=1279,608
+AudioAnalyzePeak         peak_medlow;          //xy=1292,563
+AudioConnection          patchCord1(adc, amp);
+AudioConnection          patchCord2(amp, peak_all);
+AudioConnection          patchCord3(amp, fir_low);
+AudioConnection          patchCord4(amp, fir_medlow);
+AudioConnection          patchCord5(amp, fir_med);
+AudioConnection          patchCord6(amp, fir_high);
+AudioConnection          patchCord7(fir_med, peak_med);
+AudioConnection          patchCord8(fir_high, peak_high);
+AudioConnection          patchCord9(fir_low, peak_low);
+AudioConnection          patchCord10(fir_medlow, peak_medlow);
 // GUItool: end automatically generated code
 
 float bin1 = 0.0;
