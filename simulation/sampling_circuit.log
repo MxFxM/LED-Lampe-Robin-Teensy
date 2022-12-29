@@ -1,0 +1,25 @@
+Circuit: * D:\Repositories\LED-Lampe-Robin-Teensy\simulation\sampling_circuit.asc
+
+Direct Newton iteration for .op point succeeded.
+.step freq=20
+.step freq=200
+.step freq=2000
+.step freq=20000
+
+Date: Thu Dec 29 18:53:23 2022
+Total elapsed time: 1.740 seconds.
+
+tnom = 27
+temp = 27
+method = modified trap
+totiter = 562804
+traniter = 562800
+tranpoints = 177842
+accept = 119991
+rejected = 57851
+matrix size = 8
+fillins = 0
+solver = Normal
+Matrix Compiler1: 264 bytes object code size  0.1/0.1/[0.0]
+Matrix Compiler2: off  [0.1]/0.1/0.1
+
