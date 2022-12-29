@@ -39,7 +39,6 @@ AudioConnection          patchCord3(amp, fft256);
 
 float bin_all = 0.0;
 float bin_low = 0.0;
-float bin_medlow = 0.0;
 float bin_med = 0.0;
 float bin_high = 0.0;
 float gain = 1.0;
@@ -53,8 +52,7 @@ void update_peaks(void);
 void run_animation(void);
 void adjust_gain(void);
 
-void setup()
-{
+void setup() {
     // setup audio nodes
     AudioMemory(1024); // memory reserved
     amp.gain(gain); // starting gain for automatic adjustment
@@ -69,8 +67,7 @@ void setup()
     #endif
 }
 
-void loop()
-{
+void loop() {
     // run main functions
     update_peaks(); // update peak values for all bins
     run_animation(); // show on the led strips
@@ -91,29 +88,24 @@ void printFloat(float value) {
     #endif
 }
 
-void adjust_gain(void)
-{
+void adjust_gain(void) {
     // if the overall peak is too high, decrease amplification faster
-    if (bin_all > 0.6)
-    {
+    if (bin_all > 0.6) {
         gain -= 0.1;
     }
 
     // if the overall peak is too low, increase amplification slowly
-    if (bin_all < 0.3)
-    {
+    if (bin_all < 0.3) {
         gain += 0.05;
     }
 
     // limit the maximum gain
-    if (gain > MAXIMUM_GAIN)
-    {
+    if (gain > MAXIMUM_GAIN) {
         gain = MAXIMUM_GAIN;
     }
 
     // limit the minimum gain
-    if (gain < MINIMUM_GAIN)
-    {
+    if (gain < MINIMUM_GAIN) {
         gain = MINIMUM_GAIN;
     }
 
@@ -126,55 +118,86 @@ void adjust_gain(void)
 void update_peaks(void) {
     // update overall peak measurement
     float peak = bin_all; // get the old value
+    float peak_low = bin_low; // get the old value
+    float peak_med = bin_med; // get the old value
+    float peak_high = bin_high; // get the old value
 
     // if there is a new value available, read it
+    // this one is required for gain adjustment
     if (peak_all.available())
     {
         peak = peak_all.read();
     }
 
-    printFloat(peak);
+    // same for fft values
+    if (fft256.available()) {
+        peak_low = fft256.read(0, 1); // roughly 0 to 340 Hz
+        peak_med = fft256.read(2, 6); // roughly 340 Hz to 1020 Hz
+        peak_high = fft256.read(7, 60); // roughly 1020 Hz to 10k2 Hz
+    }
 
-    if (peak >= bin_all)
-    {
+    // decay gain value
+    if (peak >= bin_all) {
         // if the new peak value is higher than or equal to before
         bin_all = peak; // use the higher value
-    }
-    else
-    {
+    } else {
         // if the new value is less than the old peak value
         bin_all = bin_all - BEAT_DECAY; // decrease the peak slowly
     }
 
+    // decay low peak
+    if (peak_low >= bin_low) {
+        // if the new peak value is higher than or equal to before
+        bin_low = peak_low; // use the higher value
+    } else {
+        // if the new value is less than the old peak value
+        bin_low = bin_low - BEAT_DECAY; // decrease the peak slowly
+    }
+
+    // decay medium peak
+    if (peak_med >= bin_med) {
+        // if the new peak value is higher than or equal to before
+        bin_med = peak_med; // use the higher value
+    } else {
+        // if the new value is less than the old peak value
+        bin_med = bin_med - BEAT_DECAY; // decrease the peak slowly
+    }
+
+    // decay high peak
+    if (peak_high >= bin_high) {
+        // if the new peak value is higher than or equal to before
+        bin_high = peak_high; // use the higher value
+    } else {
+        // if the new value is less than the old peak value
+        bin_high = bin_high - BEAT_DECAY; // decrease the peak slowly
+    }
+
     printFloat(bin_all);
+    printFloat(bin_low);
+    printFloat(bin_med);
+    printFloat(bin_high);
 }
 
-void run_animation(void)
-{
+void run_animation(void) {
     // how many leds to turn on depends on the peak value
     int turnonnr = map(bin_all, 0.2, 0.8, 0, NUMPIXELS); // map to number of pixels
 
     // limit in case of unexpected input range
-    if (turnonnr > NUMPIXELS)
-    {
+    if (turnonnr > NUMPIXELS) {
         turnonnr = NUMPIXELS;
     }
 
     // limit in case of unexpected input range
-    if (turnonnr < 0)
-    {
+    if (turnonnr < 0) {
         turnonnr = 0;
     }
-
-    printFloat(turnonnr);
 
     // set the color
     HsvColor hsvcol;
     hue += HUE_CHANGE_SPEED_SLOW; // increase hue value for rainbow effect
 
     // limit to 255
-    if (hue > 255)
-    {
+    if (hue > 255) {
         hue = 0;
     }
 
@@ -187,43 +210,33 @@ void run_animation(void)
     RgbColor rgbcol = HsvToRgb(hsvcol);
 
     // decay led brightness
-    for (int i = 0; i < NUMPIXELS; i++)
-    {
-        if (ledarray[i].r > BRIGHTNESS_DECAY)
-        {
+    for (int i = 0; i < NUMPIXELS; i++) {
+        if (ledarray[i].r > BRIGHTNESS_DECAY) {
             ledarray[i].r -= BRIGHTNESS_DECAY;
-        }
-        else
-        {
+        } else {
             ledarray[i].r = 0;
         }
-        if (ledarray[i].g > BRIGHTNESS_DECAY)
-        {
+
+        if (ledarray[i].g > BRIGHTNESS_DECAY) {
             ledarray[i].g -= BRIGHTNESS_DECAY;
-        }
-        else
-        {
+        } else {
             ledarray[i].g = 0;
         }
-        if (ledarray[i].b > BRIGHTNESS_DECAY)
-        {
+
+        if (ledarray[i].b > BRIGHTNESS_DECAY) {
             ledarray[i].b -= BRIGHTNESS_DECAY;
-        }
-        else
-        {
+        } else {
             ledarray[i].b = 0;
         }
     }
 
     // turn the new leds on
-    for (int i = 0; i < turnonnr; i++)
-    {
+    for (int i = 0; i < turnonnr; i++) {
         ledarray[i] = rgbcol;
     }
 
     // update all leds according to their new value
-    for (int i = 0; i < NUMPIXELS; i++)
-    {
+    for (int i = 0; i < NUMPIXELS; i++) {
         leds.setPixel(i, ledarray[i].r, ledarray[i].g, ledarray[i].b);
     }
 
