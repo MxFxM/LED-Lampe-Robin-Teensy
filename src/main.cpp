@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include <color.h>
+#include <filter_tabs.h>
 
 #define DEBUG_PRINTS true
 
