@@ -8,19 +8,19 @@
 #define MAXIMUM_GAIN 70.0
 #define BEAT_DECAY 0.05
 #define HUE_CHANGE_SPEED_SLOW 0.1
-#define DEFAULT_BRIGHTNESS 10
+#define DEFAULT_BRIGHTNESS 20
 
-#define BRIGHTNESS_DECAY 1
+#define BRIGHTNESS_DECAY 1.2
 
 # define NUMBER_OF_STRIPES 3
-int stripe_offsets[3] = {0, 4, 8};
-int leds_per_stripe = 4;
+int stripe_offsets[NUMBER_OF_STRIPES] = {0, 16, 32};
+int leds_per_stripe = 15;
 float bin_list[] = {0.0, 0.0, 0.0};
 
 #include <WS2812Serial.h>
 //  Teensy 4.1:  1, 8, 14, 17, 20, 24, 29, 35, 47, 53
 #define LEDPIN 1
-#define NUMPIXELS 14
+#define NUMPIXELS 47
 byte drawingMemory[NUMPIXELS * 3];         //  3 bytes per LED
 DMAMEM byte displayMemory[NUMPIXELS * 12]; // 12 bytes per LED
 WS2812Serial leds(NUMPIXELS, displayMemory, drawingMemory, LEDPIN, WS2812_GRB);
@@ -136,8 +136,8 @@ void update_peaks(void) {
 
     // same for fft values
     if (fft256.available()) {
-        peak_low = fft256.read(0); // roughly 0 to 170 Hz
-        peak_med = fft256.read(1, 10); // roughly 170 Hz to 1700 Hz
+        peak_low = fft256.read(0, 1); // roughly 0 to 340 Hz
+        peak_med = fft256.read(2, 10); // roughly 340 Hz to 1700 Hz
         peak_high = fft256.read(11, 60); // roughly 1700 Hz to 10k2 Hz
     }
 
@@ -209,19 +209,19 @@ void run_animation(void) {
     // decay led brightness
     for (int i = 0; i < NUMPIXELS; i++) {
         if (ledarray[i].r > BRIGHTNESS_DECAY) {
-            ledarray[i].r -= BRIGHTNESS_DECAY;
+            ledarray[i].r = int(ledarray[i].r / BRIGHTNESS_DECAY);
         } else {
             ledarray[i].r = 0;
         }
 
         if (ledarray[i].g > BRIGHTNESS_DECAY) {
-            ledarray[i].g -= BRIGHTNESS_DECAY;
+            ledarray[i].g = int(ledarray[i].g / BRIGHTNESS_DECAY);
         } else {
             ledarray[i].g = 0;
         }
 
         if (ledarray[i].b > BRIGHTNESS_DECAY) {
-            ledarray[i].b -= BRIGHTNESS_DECAY;
+            ledarray[i].b = int(ledarray[i].b / BRIGHTNESS_DECAY);
         } else {
             ledarray[i].b = 0;
         }
