@@ -8,14 +8,19 @@
 #define MAXIMUM_GAIN 70.0
 #define BEAT_DECAY 0.05
 #define HUE_CHANGE_SPEED_SLOW 0.1
-#define DEFAULT_BRIGHTNESS 10
+#define DEFAULT_BRIGHTNESS 20
 
-#define BRIGHTNESS_DECAY 1
+#define BRIGHTNESS_DECAY 1.2
+
+# define NUMBER_OF_STRIPES 3
+int stripe_offsets[NUMBER_OF_STRIPES] = {0, 16, 32};
+int leds_per_stripe = 15;
+float bin_list[] = {0.0, 0.0, 0.0};
 
 #include <WS2812Serial.h>
 //  Teensy 4.1:  1, 8, 14, 17, 20, 24, 29, 35, 47, 53
 #define LEDPIN 1
-#define NUMPIXELS 14
+#define NUMPIXELS 47
 byte drawingMemory[NUMPIXELS * 3];         //  3 bytes per LED
 DMAMEM byte displayMemory[NUMPIXELS * 12]; // 12 bytes per LED
 WS2812Serial leds(NUMPIXELS, displayMemory, drawingMemory, LEDPIN, WS2812_GRB);
@@ -131,8 +136,8 @@ void update_peaks(void) {
 
     // same for fft values
     if (fft256.available()) {
-        peak_low = fft256.read(0); // roughly 0 to 170 Hz
-        peak_med = fft256.read(1, 10); // roughly 170 Hz to 1700 Hz
+        peak_low = fft256.read(0, 1); // roughly 0 to 340 Hz
+        peak_med = fft256.read(2, 10); // roughly 340 Hz to 1700 Hz
         peak_high = fft256.read(11, 60); // roughly 1700 Hz to 10k2 Hz
     }
 
@@ -172,6 +177,11 @@ void update_peaks(void) {
         bin_high = bin_high - BEAT_DECAY; // decrease the peak slowly
     }
 
+    // pack values in list for later accessing
+    bin_list[0] = bin_low;
+    bin_list[1] = bin_med;
+    bin_list[2] = bin_high;
+
     //printFloat(bin_all);
     printFloat(bin_low);
     printFloat(bin_med);
@@ -179,20 +189,7 @@ void update_peaks(void) {
 }
 
 void run_animation(void) {
-    // how many leds to turn on depends on the peak value
-    int turnonnr = map(bin_all, 0.2, 0.8, 0, NUMPIXELS); // map to number of pixels
-
-    // limit in case of unexpected input range
-    if (turnonnr > NUMPIXELS) {
-        turnonnr = NUMPIXELS;
-    }
-
-    // limit in case of unexpected input range
-    if (turnonnr < 0) {
-        turnonnr = 0;
-    }
-
-    // set the color
+    // prepare the color
     HsvColor hsvcol;
     hue += HUE_CHANGE_SPEED_SLOW; // increase hue value for rainbow effect
 
@@ -212,27 +209,42 @@ void run_animation(void) {
     // decay led brightness
     for (int i = 0; i < NUMPIXELS; i++) {
         if (ledarray[i].r > BRIGHTNESS_DECAY) {
-            ledarray[i].r -= BRIGHTNESS_DECAY;
+            ledarray[i].r = int(ledarray[i].r / BRIGHTNESS_DECAY);
         } else {
             ledarray[i].r = 0;
         }
 
         if (ledarray[i].g > BRIGHTNESS_DECAY) {
-            ledarray[i].g -= BRIGHTNESS_DECAY;
+            ledarray[i].g = int(ledarray[i].g / BRIGHTNESS_DECAY);
         } else {
             ledarray[i].g = 0;
         }
 
         if (ledarray[i].b > BRIGHTNESS_DECAY) {
-            ledarray[i].b -= BRIGHTNESS_DECAY;
+            ledarray[i].b = int(ledarray[i].b / BRIGHTNESS_DECAY);
         } else {
             ledarray[i].b = 0;
         }
     }
 
-    // turn the new leds on
-    for (int i = 0; i < turnonnr; i++) {
-        ledarray[i] = rgbcol;
+    for (int stripenr = 0; stripenr < NUMBER_OF_STRIPES; stripenr++) {
+        // how many leds to turn on depends on the peak value of the bin
+        int turnonnr = map(bin_list[stripenr], 0.0, 0.6, 0, leds_per_stripe); // map to number of pixels
+
+        // limit in case of unexpected input range
+        if (turnonnr > leds_per_stripe) {
+            turnonnr = leds_per_stripe;
+        }
+
+        // limit in case of unexpected input range
+        if (turnonnr < 0) {
+            turnonnr = 0;
+        }
+
+        // turn the new leds on
+        for (int i = 0; i < turnonnr; i++) {
+            ledarray[i + stripe_offsets[stripenr]] = rgbcol;
+        }
     }
 
     // update all leds according to their new value
