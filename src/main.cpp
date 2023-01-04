@@ -7,7 +7,7 @@
 #define MAIN_LOOP_DELAY 0
 
 #define MINIMUM_GAIN 0.2
-#define MAXIMUM_GAIN 70.0
+#define MAXIMUM_GAIN 100.0
 #define BEAT_DECAY 0.05
 #define HUE_CHANGE_SPEED_SLOW 0.1
 #define DEFAULT_BRIGHTNESS 100
@@ -134,12 +134,16 @@ void adjust_gain(void)
     // set the new gain value for the next loop
     amp.gain(gain);
 
-    for (int gn = 0; gn < NUMBER_OF_STRIPES; gn++)
+    for (int gn = 1; gn < NUMBER_OF_STRIPES; gn++)
     {
         // if the overall peak is too high, decrease amplification faster
-        if (bins[gn] > 0.3)
+        if (bins[gn] > 0.9)
         {
-            gains[gn] -= 0.1;
+            gains[gn] -= 0.05;
+        }
+        else if (bins[gn] > 0.3)
+        {
+            gains[gn] -= 0.01;
         }
 
         // if the overall peak is too low, increase amplification slowly
