@@ -16,6 +16,7 @@
 
 #define NUMBER_OF_STRIPES 16
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
+float stripe_maximums[NUMBER_OF_STRIPES] = {0.5, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.5, 0.2};
 int leds_per_stripe = 67;
 float bin_list[] = {0.0, 0.0, 0.0};
 
@@ -47,7 +48,7 @@ AudioConnection patchCord3(amp, fft256);
 
 float bin_all = 0.0;
 float bins[NUMBER_OF_STRIPES];
-float gain = 1.0;
+float gain = 20.0;
 float gains[NUMBER_OF_STRIPES];
 float hue = 0.0;
 
@@ -64,7 +65,7 @@ void setup()
     // setup audio nodes
     AudioMemory(1024);         // memory reserved
     amp.gain(gain);            // starting gain for automatic adjustment
-    fft256.averageTogether(5); // with roughly 300 values per second, this still updates 60 times per second
+    fft256.averageTogether(6); // with roughly 300 values per second, this still updates 60 times per second
 
     // setup ws2812b leds
     leds.begin(); // begin serial driver
@@ -103,16 +104,30 @@ void printFloat(float value)
 #endif
 }
 
+float getmaxpeak(void)
+{
+    float maxp = 0;
+    for (int bn = 0; bn < NUMBER_OF_STRIPES; bn++)
+    {
+        if (bins[bn] > maxp)
+        {
+            maxp = bins[bn];
+        }
+    }
+    return maxp;
+}
+
 void adjust_gain(void)
 {
+    float maxpeak = bin_all; // getmaxpeak();
     // if the overall peak is too high, decrease amplification faster
-    if (bin_all > 0.6)
+    if (maxpeak > 0.95)
     {
         gain -= 0.1;
     }
 
     // if the overall peak is too low, increase amplification slowly
-    if (bin_all < 0.3)
+    if (maxpeak < 0.6)
     {
         gain += 0.05;
     }
@@ -129,7 +144,7 @@ void adjust_gain(void)
         gain = MINIMUM_GAIN;
     }
 
-    // printFloat(gain);
+    printFloat(gain);
 
     // set the new gain value for the next loop
     amp.gain(gain);
@@ -183,22 +198,22 @@ void update_peaks(void)
     if (fft256.available())
     {
         // add to bins by hand
-        peak_bins[0] = fft256.read(0) * gains[0];
-        peak_bins[1] = fft256.read(1) * gains[1];
-        peak_bins[2] = fft256.read(2) * gains[2];
-        peak_bins[3] = fft256.read(3, 4) * gains[3];
-        peak_bins[4] = fft256.read(5, 6) * gains[4];
-        peak_bins[5] = fft256.read(7, 8) * gains[5];
-        peak_bins[6] = fft256.read(9, 10) * gains[6];
-        peak_bins[7] = fft256.read(11, 12) * gains[7];
-        peak_bins[8] = fft256.read(13, 14) * gains[8];
-        peak_bins[9] = fft256.read(15, 16) * gains[9];
-        peak_bins[10] = fft256.read(17, 20) * gains[10];
-        peak_bins[11] = fft256.read(21, 22) * gains[11];
-        peak_bins[12] = fft256.read(23, 24) * gains[12];
-        peak_bins[13] = fft256.read(25, 26) * gains[13];
-        peak_bins[14] = fft256.read(27, 28) * gains[14];
-        peak_bins[15] = fft256.read(29, 30) * gains[15];
+        peak_bins[0] = fft256.read(1) * gains[0];
+        peak_bins[1] = fft256.read(2) * gains[1];
+        peak_bins[2] = fft256.read(3) * gains[2];
+        peak_bins[3] = fft256.read(4) * gains[3];
+        peak_bins[4] = fft256.read(5) * gains[4];
+        peak_bins[5] = fft256.read(6) * gains[5];
+        peak_bins[6] = fft256.read(7) * gains[6];
+        peak_bins[7] = fft256.read(8) * gains[7];
+        peak_bins[8] = fft256.read(9) * gains[8];
+        peak_bins[9] = fft256.read(10) * gains[9];
+        peak_bins[10] = fft256.read(11, 12) * gains[10];
+        peak_bins[11] = fft256.read(13, 14) * gains[11];
+        peak_bins[12] = fft256.read(15, 16) * gains[12];
+        peak_bins[13] = fft256.read(17, 20) * gains[13];
+        peak_bins[14] = fft256.read(21, 26) * gains[14];
+        peak_bins[15] = fft256.read(27, 30) * gains[15];
     }
 
     // decay gain value
@@ -293,7 +308,7 @@ void run_animation(void)
     for (int stripenr = 0; stripenr < NUMBER_OF_STRIPES; stripenr++)
     {
         // how many leds to turn on depends on the peak value of the bin
-        int turnonnr = map(bins[stripenr], 0.0, 0.6, 0, leds_per_stripe); // map to number of pixels // modulo to account for 3 strips only at the moment
+        int turnonnr = map(bins[stripenr], 0.0, stripe_maximums[stripenr], 1, leds_per_stripe); // map to number of pixels // modulo to account for 3 strips only at the moment
 
         // limit in case of unexpected input range
         if (turnonnr > leds_per_stripe)
@@ -320,7 +335,7 @@ void run_animation(void)
             // turn the new leds on, start inverted, since the zig-za
             for (int i = 0; i < turnonnr; i++)
             {
-                ledarray[stripe_offsets[stripenr + 1] - i] = rgbcol;
+                ledarray[stripe_offsets[stripenr + 1] - i - 1] = rgbcol;
             }
         }
     }
