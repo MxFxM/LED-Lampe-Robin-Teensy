@@ -12,7 +12,7 @@
 #define HUE_CHANGE_SPEED_SLOW 0.1
 #define DEFAULT_BRIGHTNESS 20
 
-#define BRIGHTNESS_DECAY 1.2
+#define BRIGHTNESS_DECAY 1.3
 
 #define NUMBER_OF_STRIPES 16
 int stripe_offsets[NUMBER_OF_STRIPES] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005};
@@ -46,9 +46,7 @@ AudioConnection patchCord3(amp, fft256);
 // GUItool: end automatically generated code
 
 float bin_all = 0.0;
-float bin_low = 0.0;
-float bin_med = 0.0;
-float bin_high = 0.0;
+float bins[NUMBER_OF_STRIPES];
 float gain = 1.0;
 float hue = 0.0;
 
@@ -134,10 +132,12 @@ void adjust_gain(void)
 void update_peaks(void)
 {
     // update overall peak measurement
-    float peak = bin_all;       // get the old value
-    float peak_low = bin_low;   // get the old value
-    float peak_med = bin_med;   // get the old value
-    float peak_high = bin_high; // get the old value
+    float peak = bin_all; // get the old value
+    float peak_bins[NUMBER_OF_STRIPES];
+    for (int bn = 0; bn < NUMBER_OF_STRIPES; bn++)
+    {
+        peak_bins[bn] = bins[bn]; // get the old value
+    }
 
     // if there is a new value available, read it
     // this one is required for gain adjustment
@@ -149,9 +149,23 @@ void update_peaks(void)
     // same for fft values
     if (fft256.available())
     {
-        peak_low = fft256.read(0, 1);    // roughly 0 to 340 Hz
-        peak_med = fft256.read(2, 10);   // roughly 340 Hz to 1700 Hz
-        peak_high = fft256.read(11, 60); // roughly 1700 Hz to 10k2 Hz
+        // add to bins by hand
+        peak_bins[0] = fft256.read(0);
+        peak_bins[1] = fft256.read(1, 2);
+        peak_bins[2] = fft256.read(3, 4);
+        peak_bins[3] = fft256.read(5, 6);
+        peak_bins[4] = fft256.read(6, 7);
+        peak_bins[5] = fft256.read(8, 9);
+        peak_bins[6] = fft256.read(10, 12);
+        peak_bins[7] = fft256.read(13, 15);
+        peak_bins[8] = fft256.read(16, 18);
+        peak_bins[9] = fft256.read(19, 21);
+        peak_bins[10] = fft256.read(22, 25);
+        peak_bins[11] = fft256.read(26, 30);
+        peak_bins[12] = fft256.read(31, 35);
+        peak_bins[13] = fft256.read(36, 40);
+        peak_bins[14] = fft256.read(41, 50);
+        peak_bins[15] = fft256.read(51, 60);
     }
 
     // decay gain value
@@ -166,51 +180,30 @@ void update_peaks(void)
         bin_all = bin_all - BEAT_DECAY; // decrease the peak slowly
     }
 
-    // decay low peak
-    if (peak_low >= bin_low)
+    // decay all bins
+    for (int bn = 0; bn < NUMBER_OF_STRIPES; bn++)
     {
-        // if the new peak value is higher than or equal to before
-        bin_low = peak_low; // use the higher value
-    }
-    else
-    {
-        // if the new value is less than the old peak value
-        bin_low = bin_low - BEAT_DECAY; // decrease the peak slowly
-    }
-
-    // decay medium peak
-    if (peak_med >= bin_med)
-    {
-        // if the new peak value is higher than or equal to before
-        bin_med = peak_med; // use the higher value
-    }
-    else
-    {
-        // if the new value is less than the old peak value
-        bin_med = bin_med - BEAT_DECAY; // decrease the peak slowly
-    }
-
-    // decay high peak
-    if (peak_high >= bin_high)
-    {
-        // if the new peak value is higher than or equal to before
-        bin_high = peak_high; // use the higher value
-    }
-    else
-    {
-        // if the new value is less than the old peak value
-        bin_high = bin_high - BEAT_DECAY; // decrease the peak slowly
+        if (peak_bins[bn] >= bins[bn])
+        {
+            // if the new peak value is higher than or equal to before
+            bins[bn] = peak_bins[bn]; // use the higher value
+        }
+        else
+        {
+            // if the new value is less than the old peak value
+            bins[bn] = bins[bn] - BEAT_DECAY; // decrease the peak slowly
+        }
     }
 
     // pack values in list for later accessing
-    bin_list[0] = bin_low;
-    bin_list[1] = bin_med;
-    bin_list[2] = bin_high;
+    // bin_list[0] = bin_low;
+    // bin_list[1] = bin_med;
+    // bin_list[2] = bin_high;
 
     // printFloat(bin_all);
-    printFloat(bin_low);
-    printFloat(bin_med);
-    printFloat(bin_high);
+    // printFloat(bin_low);
+    // printFloat(bin_med);
+    // printFloat(bin_high);
 }
 
 void run_animation(void)
@@ -267,7 +260,7 @@ void run_animation(void)
     for (int stripenr = 0; stripenr < NUMBER_OF_STRIPES; stripenr++)
     {
         // how many leds to turn on depends on the peak value of the bin
-        int turnonnr = map(bin_list[stripenr % 3], 0.0, 0.6, 0, leds_per_stripe); // map to number of pixels // modulo to account for 3 strips only at the moment
+        int turnonnr = map(bins[stripenr], 0.0, 0.6, 0, leds_per_stripe); // map to number of pixels // modulo to account for 3 strips only at the moment
 
         // limit in case of unexpected input range
         if (turnonnr > leds_per_stripe)
