@@ -15,7 +15,7 @@
 #define BRIGHTNESS_DECAY 1.3
 
 #define NUMBER_OF_STRIPES 16
-int stripe_offsets[NUMBER_OF_STRIPES] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005};
+int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
 int leds_per_stripe = 67;
 float bin_list[] = {0.0, 0.0, 0.0};
 
@@ -274,10 +274,21 @@ void run_animation(void)
             turnonnr = 0;
         }
 
-        // turn the new leds on
-        for (int i = 0; i < turnonnr; i++)
-        {
-            ledarray[i + stripe_offsets[stripenr]] = rgbcol;
+        if (stripenr % 2 == 0)
+        { // every even row
+            // turn the new leds on
+            for (int i = 0; i < turnonnr; i++)
+            {
+                ledarray[i + stripe_offsets[stripenr]] = rgbcol;
+            }
+        }
+        else
+        { // every odd row
+            // turn the new leds on, start inverted, since the zig-za
+            for (int i = 0; i < turnonnr; i++)
+            {
+                ledarray[stripe_offsets[stripenr + 1] - i] = rgbcol;
+            }
         }
     }
 
