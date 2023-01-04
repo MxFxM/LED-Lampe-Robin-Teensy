@@ -267,7 +267,7 @@ void run_animation(void)
     for (int stripenr = 0; stripenr < NUMBER_OF_STRIPES; stripenr++)
     {
         // how many leds to turn on depends on the peak value of the bin
-        int turnonnr = map(bin_list[stripenr % 3], 0.0, 0.6, 0, leds_per_stripe); // map to number of pixels
+        int turnonnr = map(bin_list[stripenr % 3], 0.0, 0.6, 0, leds_per_stripe); // map to number of pixels // modulo to account for 3 strips only at the moment
 
         // limit in case of unexpected input range
         if (turnonnr > leds_per_stripe)
