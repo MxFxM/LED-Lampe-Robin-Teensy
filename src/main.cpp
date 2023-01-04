@@ -137,13 +137,13 @@ void adjust_gain(void)
     for (int gn = 0; gn < NUMBER_OF_STRIPES; gn++)
     {
         // if the overall peak is too high, decrease amplification faster
-        if (bins[gn] > 0.4)
+        if (bins[gn] > 0.3)
         {
             gains[gn] -= 0.1;
         }
 
         // if the overall peak is too low, increase amplification slowly
-        if (bins[gn] < 0.1)
+        if (bins[gn] < 0.01)
         {
             gains[gn] += 0.01;
         }
