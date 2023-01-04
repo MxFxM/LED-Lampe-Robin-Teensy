@@ -10,7 +10,7 @@
 #define MAXIMUM_GAIN 70.0
 #define BEAT_DECAY 0.05
 #define HUE_CHANGE_SPEED_SLOW 0.1
-#define DEFAULT_BRIGHTNESS 20
+#define DEFAULT_BRIGHTNESS 100
 
 #define BRIGHTNESS_DECAY 1.3
 
@@ -184,21 +184,21 @@ void update_peaks(void)
     {
         // add to bins by hand
         peak_bins[0] = fft256.read(0) * gains[0];
-        peak_bins[1] = fft256.read(1, 2) * gains[1];
-        peak_bins[2] = fft256.read(3, 4) * gains[2];
-        peak_bins[3] = fft256.read(5, 6) * gains[3];
-        peak_bins[4] = fft256.read(6, 7) * gains[4];
-        peak_bins[5] = fft256.read(8, 9) * gains[5];
-        peak_bins[6] = fft256.read(10, 12) * gains[6];
-        peak_bins[7] = fft256.read(13, 15) * gains[7];
-        peak_bins[8] = fft256.read(16, 18) * gains[8];
+        peak_bins[1] = fft256.read(1) * gains[1];
+        peak_bins[2] = fft256.read(2) * gains[2];
+        peak_bins[3] = fft256.read(3, 4) * gains[3];
+        peak_bins[4] = fft256.read(5, 6) * gains[4];
+        peak_bins[5] = fft256.read(7, 8) * gains[5];
+        peak_bins[6] = fft256.read(9, 11) * gains[6];
+        peak_bins[7] = fft256.read(12, 14) * gains[7];
+        peak_bins[8] = fft256.read(15, 18) * gains[8];
         peak_bins[9] = fft256.read(19, 21) * gains[9];
         peak_bins[10] = fft256.read(22, 25) * gains[10];
         peak_bins[11] = fft256.read(26, 30) * gains[11];
-        peak_bins[12] = fft256.read(31, 35) * gains[12];
-        peak_bins[13] = fft256.read(36, 40) * gains[13];
-        peak_bins[14] = fft256.read(41, 50) * gains[14];
-        peak_bins[15] = fft256.read(51, 60) * gains[15];
+        peak_bins[12] = fft256.read(31, 40) * gains[12];
+        peak_bins[13] = fft256.read(41, 60) * gains[13];
+        peak_bins[14] = fft256.read(61, 80) * gains[14];
+        peak_bins[15] = fft256.read(81, 100) * gains[15];
     }
 
     // decay gain value
