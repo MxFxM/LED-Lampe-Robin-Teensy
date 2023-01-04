@@ -134,14 +134,10 @@ void adjust_gain(void)
     // set the new gain value for the next loop
     amp.gain(gain);
 
-    for (int gn = 1; gn < NUMBER_OF_STRIPES; gn++)
+    for (int gn = NUMBER_OF_STRIPES; gn < NUMBER_OF_STRIPES; gn++)
     {
         // if the overall peak is too high, decrease amplification faster
-        if (bins[gn] > 0.9)
-        {
-            gains[gn] -= 0.05;
-        }
-        else if (bins[gn] > 0.3)
+        if (bins[gn] > 0.5)
         {
             gains[gn] -= 0.01;
         }
@@ -193,16 +189,16 @@ void update_peaks(void)
         peak_bins[3] = fft256.read(3, 4) * gains[3];
         peak_bins[4] = fft256.read(5, 6) * gains[4];
         peak_bins[5] = fft256.read(7, 8) * gains[5];
-        peak_bins[6] = fft256.read(9, 11) * gains[6];
-        peak_bins[7] = fft256.read(12, 14) * gains[7];
-        peak_bins[8] = fft256.read(15, 18) * gains[8];
-        peak_bins[9] = fft256.read(19, 21) * gains[9];
-        peak_bins[10] = fft256.read(22, 25) * gains[10];
-        peak_bins[11] = fft256.read(26, 30) * gains[11];
-        peak_bins[12] = fft256.read(31, 40) * gains[12];
-        peak_bins[13] = fft256.read(41, 60) * gains[13];
-        peak_bins[14] = fft256.read(61, 80) * gains[14];
-        peak_bins[15] = fft256.read(81, 100) * gains[15];
+        peak_bins[6] = fft256.read(9, 10) * gains[6];
+        peak_bins[7] = fft256.read(11, 12) * gains[7];
+        peak_bins[8] = fft256.read(13, 14) * gains[8];
+        peak_bins[9] = fft256.read(15, 16) * gains[9];
+        peak_bins[10] = fft256.read(17, 20) * gains[10];
+        peak_bins[11] = fft256.read(21, 22) * gains[11];
+        peak_bins[12] = fft256.read(23, 24) * gains[12];
+        peak_bins[13] = fft256.read(25, 26) * gains[13];
+        peak_bins[14] = fft256.read(27, 28) * gains[14];
+        peak_bins[15] = fft256.read(29, 30) * gains[15];
     }
 
     // decay gain value
