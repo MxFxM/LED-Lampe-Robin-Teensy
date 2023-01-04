@@ -12,11 +12,11 @@
 #define HUE_CHANGE_SPEED_SLOW 0.1
 #define DEFAULT_BRIGHTNESS 100
 
-#define BRIGHTNESS_DECAY 1.3
+#define BRIGHTNESS_DECAY 1.5
 
 #define NUMBER_OF_STRIPES 16
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
-float stripe_maximums[NUMBER_OF_STRIPES] = {0.5, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.5, 0.2};
+float stripe_maximums[NUMBER_OF_STRIPES] = {0.7, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.5, 0.2};
 int leds_per_stripe = 67;
 float bin_list[] = {0.0, 0.0, 0.0};
 
@@ -65,7 +65,7 @@ void setup()
     // setup audio nodes
     AudioMemory(1024);         // memory reserved
     amp.gain(gain);            // starting gain for automatic adjustment
-    fft256.averageTogether(6); // with roughly 300 values per second, this still updates 60 times per second
+    fft256.averageTogether(3); // with roughly 300 values per second, this still updates 60 times per second
 
     // setup ws2812b leds
     leds.begin(); // begin serial driver
@@ -228,19 +228,9 @@ void update_peaks(void)
         bin_all = bin_all - BEAT_DECAY; // decrease the peak slowly
     }
 
-    // decay all bins
     for (int bn = 0; bn < NUMBER_OF_STRIPES; bn++)
     {
-        if (peak_bins[bn] >= bins[bn])
-        {
-            // if the new peak value is higher than or equal to before
-            bins[bn] = peak_bins[bn]; // use the higher value
-        }
-        else
-        {
-            // if the new value is less than the old peak value
-            bins[bn] = bins[bn] - BEAT_DECAY; // decrease the peak slowly
-        }
+        bins[bn] = peak_bins[bn]; // use the higher value
     }
 
     // pack values in list for later accessing
