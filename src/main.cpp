@@ -150,30 +150,30 @@ void adjust_gain(void)
     // set the new gain value for the next loop
     amp.gain(gain);
 
-    for (int gn = NUMBER_OF_STRIPES; gn < NUMBER_OF_STRIPES; gn++)
+    for (int gn = 0; gn < NUMBER_OF_STRIPES; gn++)
     {
         // if the overall peak is too high, decrease amplification faster
-        if (bins[gn] > 0.5)
+        if (bins[gn] > stripe_maximums[gn])
         {
-            gains[gn] -= 0.01;
+            stripe_maximums[gn] += 0.1;
         }
 
         // if the overall peak is too low, increase amplification slowly
-        if (bins[gn] < 0.01)
+        if (bins[gn] < stripe_maximums[gn] / 4)
         {
-            gains[gn] += 0.01;
+            stripe_maximums[gn] -= 0.01;
         }
 
-        // limit the maximum gain
-        if (gains[gn] > MAXIMUM_GAIN)
+        // limit the maximum to 1, since the signal cannot be greater
+        if (stripe_maximums[gn] > 1.0)
         {
-            gains[gn] = MAXIMUM_GAIN;
+            stripe_maximums[gn] = 1.0;
         }
 
-        // limit the minimum gain
-        if (gains[gn] < MINIMUM_GAIN)
+        // limit the minimum maximum (lol)
+        if (stripe_maximums[gn] < 0.1)
         {
-            gains[gn] = MINIMUM_GAIN;
+            stripe_maximums[gn] = 0.1;
         }
     }
 }
