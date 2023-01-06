@@ -69,7 +69,7 @@ void update_peaks_2(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMBE
     else
     {
         // if the new value is less than the old peak value
-        *bin_all = *bin_all - BEAT_DECAY * 5; // decrease the peak slowly
+        *bin_all = *bin_all - BEAT_DECAY; // decrease the peak slowly
     }
 }
 
@@ -93,41 +93,18 @@ void run_animation_2(RgbColor ledarray[NUMPIXELS], float bins[NUMBER_OF_STRIPES]
     // convert to rgb
     RgbColor rgbcol = HsvToRgb(hsvcol);
 
-    // decay led brightness
+    // turn off led brightness
     for (int i = 0; i < NUMPIXELS; i++)
     {
-        if (ledarray[i].r > BRIGHTNESS_DECAY)
-        {
-            ledarray[i].r = int(ledarray[i].r / BRIGHTNESS_DECAY);
-        }
-        else
-        {
-            ledarray[i].r = 0;
-        }
-
-        if (ledarray[i].g > BRIGHTNESS_DECAY)
-        {
-            ledarray[i].g = int(ledarray[i].g / BRIGHTNESS_DECAY);
-        }
-        else
-        {
-            ledarray[i].g = 0;
-        }
-
-        if (ledarray[i].b > BRIGHTNESS_DECAY)
-        {
-            ledarray[i].b = int(ledarray[i].b / BRIGHTNESS_DECAY);
-        }
-        else
-        {
-            ledarray[i].b = 0;
-        }
+        ledarray[i].r = 0;
+        ledarray[i].g = 0;
+        ledarray[i].b = 0;
     }
 
     for (int stripenr = 0; stripenr < NUMBER_OF_STRIPES; stripenr++)
     {
         // how many leds to turn on depends on the peak value of the bin
-        int turnonnr = map(bins[stripenr], 0.0, 1.0, 1, LEDS_PER_STRIPE); // map to number of pixels // modulo to account for 3 strips only at the moment
+        int turnonnr = map(bins[stripenr], 0.2, 1.0, 1, LEDS_PER_STRIPE); // map to number of pixels // modulo to account for 3 strips only at the moment
 
         // limit in case of unexpected input range
         if (turnonnr > LEDS_PER_STRIPE)
