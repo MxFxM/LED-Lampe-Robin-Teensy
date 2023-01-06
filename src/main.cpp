@@ -64,8 +64,8 @@ void loop()
     // run_animation_1(ledarray, bins, stripe_offsets, stripe_maximums);               // show on the led strips
 
     // wavefront of peak
-    // update_peaks_2(&bin_all, &peak_all, bins, &gain, &amp);
-    // run_animation_2(ledarray, bins, stripe_offsets);
+    update_peaks_2(&bin_all, &peak_all, bins, &gain, &amp);
+    run_animation_2(ledarray, bins, stripe_offsets);
 
     // wavefront of bass only
     // update_peaks_3(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
@@ -76,8 +76,8 @@ void loop()
     // run_animation_4(ledarray, bins, stripe_offsets, stripe_maximums);
 
     // wavefront of peak, but centered
-    update_peaks_5(&bin_all, &peak_all, bins, &gain, &amp);
-    run_animation_5(ledarray, bins, stripe_offsets);
+    // update_peaks_5(&bin_all, &peak_all, bins, &gain, &amp);
+    // run_animation_5(ledarray, bins, stripe_offsets);
 
     printFloat(gain);
     for (int i = 0; i < NUMBER_OF_STRIPES; i++)

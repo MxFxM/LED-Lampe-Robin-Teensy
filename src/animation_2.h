@@ -17,7 +17,7 @@ void adjust_gain_2(float *bin_all, float *gain, AudioAmplifier *amp)
     }
 
     // if the overall peak is too low, increase amplification slowly
-    if (maxpeak < 0.6)
+    if (maxpeak < 0.1)
     {
         *gain += 0.1;
     }
@@ -104,7 +104,7 @@ void run_animation_2(RgbColor ledarray[NUMPIXELS], float bins[NUMBER_OF_STRIPES]
     for (int stripenr = 0; stripenr < NUMBER_OF_STRIPES; stripenr++)
     {
         // how many leds to turn on depends on the peak value of the bin
-        int turnonnr = map(bins[stripenr], 0.2, 1.0, 1, LEDS_PER_STRIPE); // map to number of pixels // modulo to account for 3 strips only at the moment
+        int turnonnr = map(bins[stripenr], 0.0, 1.0, 1, LEDS_PER_STRIPE); // map to number of pixels // modulo to account for 3 strips only at the moment
 
         // limit in case of unexpected input range
         if (turnonnr > LEDS_PER_STRIPE)
