@@ -5,6 +5,7 @@
 #include <animation_1.h>
 #include <animation_2.h>
 #include <animation_3.h>
+#include <animation_4.h>
 
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
 float stripe_maximums[NUMBER_OF_STRIPES] = {0.7, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.6, 0.2};
@@ -57,15 +58,21 @@ void setup()
 
 void loop()
 {
-    // run main functions
+    // fft bins
     // update_peaks_1(&bin_all, &peak_all, &fft256, bins, &gain, stripe_maximums, &amp); // update peak values for all bins
     // run_animation_1(ledarray, bins, stripe_offsets, stripe_maximums);               // show on the led strips
 
+    // wavefront of peak
     // update_peaks_2(&bin_all, &peak_all, bins, &gain, &amp);
     // run_animation_2(ledarray, bins, stripe_offsets);
 
-    update_peaks_3(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
-    run_animation_3(ledarray, bins, stripe_offsets, stripe_maximums);
+    // wavefront of bass only
+    // update_peaks_3(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
+    // run_animation_3(ledarray, bins, stripe_offsets, stripe_maximums);
+
+    // wavefront of bass only, but centered
+    update_peaks_4(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
+    run_animation_4(ledarray, bins, stripe_offsets, stripe_maximums);
 
     printFloat(gain);
     for (int i = 0; i < NUMBER_OF_STRIPES; i++)
