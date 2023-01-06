@@ -16,7 +16,7 @@
 
 #define NUMBER_OF_STRIPES 16
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
-float stripe_maximums[NUMBER_OF_STRIPES] = {0.7, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.5, 0.2};
+float stripe_maximums[NUMBER_OF_STRIPES] = {0.7, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.6, 0.2};
 int leds_per_stripe = 67;
 float bin_list[] = {0.0, 0.0, 0.0};
 
@@ -123,13 +123,13 @@ void adjust_gain(void)
     // if the overall peak is too high, decrease amplification faster
     if (maxpeak > 0.95)
     {
-        gain -= 0.1;
+        gain -= 0.2;
     }
 
     // if the overall peak is too low, increase amplification slowly
     if (maxpeak < 0.6)
     {
-        gain += 0.05;
+        gain += 0.1;
     }
 
     // limit the maximum gain
@@ -144,6 +144,7 @@ void adjust_gain(void)
         gain = MINIMUM_GAIN;
     }
 
+    printFloat(maxpeak);
     printFloat(gain);
 
     // set the new gain value for the next loop
