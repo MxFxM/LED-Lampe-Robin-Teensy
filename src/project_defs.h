@@ -1,0 +1,18 @@
+#define DEBUG_PRINTS true
+
+#define MAIN_LOOP_DELAY 0
+
+#define MINIMUM_GAIN 0.2
+#define MAXIMUM_GAIN 100.0
+#define BEAT_DECAY 0.05
+#define HUE_CHANGE_SPEED_SLOW 0.1
+#define DEFAULT_BRIGHTNESS 100
+
+#define BRIGHTNESS_DECAY 1.5
+
+//  Teensy 4.1:  1, 8, 14, 17, 20, 24, 29, 35, 47, 53
+#define LEDPIN 1
+// 16 * 67 = 1072
+#define NUMPIXELS 1072
+#define NUMBER_OF_STRIPES 16
+#define LEDS_PER_STRIPE 67

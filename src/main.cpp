@@ -1,30 +1,13 @@
 #include <Arduino.h>
 
-#include <color.h>
+#include <project_defs.h>
 
-#define DEBUG_PRINTS true
+#include <animation_1.h>
 
-#define MAIN_LOOP_DELAY 0
-
-#define MINIMUM_GAIN 0.2
-#define MAXIMUM_GAIN 100.0
-#define BEAT_DECAY 0.05
-#define HUE_CHANGE_SPEED_SLOW 0.1
-#define DEFAULT_BRIGHTNESS 100
-
-#define BRIGHTNESS_DECAY 1.5
-
-#define NUMBER_OF_STRIPES 16
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
 float stripe_maximums[NUMBER_OF_STRIPES] = {0.7, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.6, 0.2};
-int leds_per_stripe = 67;
-float bin_list[] = {0.0, 0.0, 0.0};
 
 #include <WS2812Serial.h>
-//  Teensy 4.1:  1, 8, 14, 17, 20, 24, 29, 35, 47, 53
-#define LEDPIN 1
-// 16 * 67 = 1072
-#define NUMPIXELS 1072
 byte drawingMemory[NUMPIXELS * 3];         //  3 bytes per LED
 DMAMEM byte displayMemory[NUMPIXELS * 12]; // 12 bytes per LED
 WS2812Serial leds(NUMPIXELS, displayMemory, drawingMemory, LEDPIN, WS2812_GRB);
@@ -49,15 +32,10 @@ AudioConnection patchCord3(amp, fft256);
 float bin_all = 0.0;
 float bins[NUMBER_OF_STRIPES];
 float gain = 20.0;
-float hue = 0.0;
 
 RgbColor ledarray[NUMPIXELS];
 
 void printFloat(float value);
-
-void update_peaks_1(void);
-void run_animation_1(void);
-void adjust_gain_1(void);
 
 void setup()
 {
@@ -78,12 +56,21 @@ void setup()
 void loop()
 {
     // run main functions
-    update_peaks_1();  // update peak values for all bins
-    run_animation_1(); // show on the led strips
+    update_peaks_1(bin_all, peak_all, fft256, bins, gain, stripe_maximums, amp); // update peak values for all bins
+    run_animation_1(ledarray, bins, stripe_offsets, stripe_maximums);            // show on the led strips
 
 #ifdef DEBUG_PRINTS
     Serial.println();
 #endif
+
+    // update all leds according to their new value
+    for (int i = 0; i < NUMPIXELS; i++)
+    {
+        leds.setPixel(i, ledarray[i].r, ledarray[i].g, ledarray[i].b);
+    }
+
+    // update the strip
+    leds.show();
 
     // other functions
     delay(MAIN_LOOP_DELAY); // slow down a little
@@ -95,243 +82,4 @@ void printFloat(float value)
     Serial.print(value);
     Serial.print("\t");
 #endif
-}
-
-float getmaxpeak(void)
-{
-    float maxp = 0;
-    for (int bn = 0; bn < NUMBER_OF_STRIPES; bn++)
-    {
-        if (bins[bn] > maxp)
-        {
-            maxp = bins[bn];
-        }
-    }
-    return maxp;
-}
-
-void adjust_gain_1(void)
-{
-    float maxpeak = bin_all; // getmaxpeak();
-    // if the overall peak is too high, decrease amplification faster
-    if (maxpeak > 0.95)
-    {
-        gain -= 0.2;
-    }
-
-    // if the overall peak is too low, increase amplification slowly
-    if (maxpeak < 0.6)
-    {
-        gain += 0.1;
-    }
-
-    // limit the maximum gain
-    if (gain > MAXIMUM_GAIN)
-    {
-        gain = MAXIMUM_GAIN;
-    }
-
-    // limit the minimum gain
-    if (gain < MINIMUM_GAIN)
-    {
-        gain = MINIMUM_GAIN;
-    }
-
-    printFloat(maxpeak);
-    printFloat(gain);
-
-    // set the new gain value for the next loop
-    amp.gain(gain);
-
-    for (int gn = 0; gn < NUMBER_OF_STRIPES; gn++)
-    {
-        // if the overall peak is too high, decrease amplification faster
-        if (bins[gn] > stripe_maximums[gn] * 0.9)
-        {
-            stripe_maximums[gn] += 0.001;
-        }
-
-        // if the overall peak is too low, increase amplification slowly
-        if (bins[gn] < stripe_maximums[gn] * 0.3)
-        {
-            stripe_maximums[gn] -= 0.0001;
-        }
-
-        // limit the maximum to 1, since the signal cannot be greater
-        if (stripe_maximums[gn] > 1.0)
-        {
-            stripe_maximums[gn] = 1.0;
-        }
-
-        // limit the minimum maximum (lol)
-        if (stripe_maximums[gn] < 0.001)
-        {
-            stripe_maximums[gn] = 0.001;
-        }
-    }
-}
-
-void update_peaks_1(void)
-{
-    // update overall peak measurement
-    float peak = bin_all; // get the old value
-    float peak_bins[NUMBER_OF_STRIPES];
-    for (int bn = 0; bn < NUMBER_OF_STRIPES; bn++)
-    {
-        peak_bins[bn] = bins[bn]; // get the old value
-    }
-
-    // if there is a new value available, read it
-    // this one is required for gain adjustment
-    if (peak_all.available())
-    {
-        peak = peak_all.read();
-    }
-
-    // same for fft values
-    if (fft256.available())
-    {
-        // add to bins by hand
-        peak_bins[0] = fft256.read(1);
-        peak_bins[1] = fft256.read(2);
-        peak_bins[2] = fft256.read(3);
-        peak_bins[3] = fft256.read(4);
-        peak_bins[4] = fft256.read(5);
-        peak_bins[5] = fft256.read(6);
-        peak_bins[6] = fft256.read(7);
-        peak_bins[7] = fft256.read(8);
-        peak_bins[8] = fft256.read(9);
-        peak_bins[9] = fft256.read(10);
-        peak_bins[10] = fft256.read(11, 12);
-        peak_bins[11] = fft256.read(13, 14);
-        peak_bins[12] = fft256.read(15, 16);
-        peak_bins[13] = fft256.read(17, 20);
-        peak_bins[14] = fft256.read(21, 26);
-        peak_bins[15] = fft256.read(27, 30);
-
-        adjust_gain_1();
-    }
-
-    // decay gain value
-    if (peak >= bin_all)
-    {
-        // if the new peak value is higher than or equal to before
-        bin_all = peak; // use the higher value
-    }
-    else
-    {
-        // if the new value is less than the old peak value
-        bin_all = bin_all - BEAT_DECAY; // decrease the peak slowly
-    }
-
-    for (int bn = 0; bn < NUMBER_OF_STRIPES; bn++)
-    {
-        bins[bn] = peak_bins[bn]; // use the higher value
-    }
-
-    // pack values in list for later accessing
-    // bin_list[0] = bin_low;
-    // bin_list[1] = bin_med;
-    // bin_list[2] = bin_high;
-
-    // printFloat(bin_all);
-    // printFloat(bin_low);
-    // printFloat(bin_med);
-    // printFloat(bin_high);
-}
-
-void run_animation_1(void)
-{
-    // prepare the color
-    HsvColor hsvcol;
-    hue += HUE_CHANGE_SPEED_SLOW; // increase hue value for rainbow effect
-
-    // limit to 255
-    if (hue > 255)
-    {
-        hue = 0;
-    }
-
-    // create hsv color
-    hsvcol.h = int(hue);
-    hsvcol.s = 255;
-    hsvcol.v = DEFAULT_BRIGHTNESS;
-
-    // convert to rgb
-    RgbColor rgbcol = HsvToRgb(hsvcol);
-
-    // decay led brightness
-    for (int i = 0; i < NUMPIXELS; i++)
-    {
-        if (ledarray[i].r > BRIGHTNESS_DECAY)
-        {
-            ledarray[i].r = int(ledarray[i].r / BRIGHTNESS_DECAY);
-        }
-        else
-        {
-            ledarray[i].r = 0;
-        }
-
-        if (ledarray[i].g > BRIGHTNESS_DECAY)
-        {
-            ledarray[i].g = int(ledarray[i].g / BRIGHTNESS_DECAY);
-        }
-        else
-        {
-            ledarray[i].g = 0;
-        }
-
-        if (ledarray[i].b > BRIGHTNESS_DECAY)
-        {
-            ledarray[i].b = int(ledarray[i].b / BRIGHTNESS_DECAY);
-        }
-        else
-        {
-            ledarray[i].b = 0;
-        }
-    }
-
-    for (int stripenr = 0; stripenr < NUMBER_OF_STRIPES; stripenr++)
-    {
-        // how many leds to turn on depends on the peak value of the bin
-        int turnonnr = map(bins[stripenr], 0.0, stripe_maximums[stripenr], 1, leds_per_stripe); // map to number of pixels // modulo to account for 3 strips only at the moment
-
-        // limit in case of unexpected input range
-        if (turnonnr > leds_per_stripe)
-        {
-            turnonnr = leds_per_stripe;
-        }
-
-        // limit in case of unexpected input range
-        if (turnonnr < 0)
-        {
-            turnonnr = 0;
-        }
-
-        if (stripenr % 2 == 0)
-        { // every even row
-            // turn the new leds on
-            for (int i = 0; i < turnonnr; i++)
-            {
-                ledarray[i + stripe_offsets[stripenr]] = rgbcol;
-            }
-        }
-        else
-        { // every odd row
-            // turn the new leds on, start inverted, since the zig-za
-            for (int i = 0; i < turnonnr; i++)
-            {
-                ledarray[stripe_offsets[stripenr + 1] - i - 1] = rgbcol;
-            }
-        }
-    }
-
-    // update all leds according to their new value
-    for (int i = 0; i < NUMPIXELS; i++)
-    {
-        leds.setPixel(i, ledarray[i].r, ledarray[i].g, ledarray[i].b);
-    }
-
-    // update the strip
-    leds.show();
 }
