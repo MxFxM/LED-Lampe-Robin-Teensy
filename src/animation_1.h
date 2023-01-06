@@ -20,7 +20,7 @@ float getmaxpeak(float bins[NUMBER_OF_STRIPES])
     return maxp;
 }
 
-void adjust_gain_1(float *bin_all, float *gain, float bins[NUMBER_OF_STRIPES], float stripe_maximums[NUMBER_OF_STRIPES], AudioAmplifier amp)
+void adjust_gain_1(float *bin_all, float *gain, float bins[NUMBER_OF_STRIPES], float stripe_maximums[NUMBER_OF_STRIPES], AudioAmplifier *amp)
 {
     float maxpeak = *bin_all; // getmaxpeak(bins);
     // if the overall peak is too high, decrease amplification faster
@@ -48,7 +48,7 @@ void adjust_gain_1(float *bin_all, float *gain, float bins[NUMBER_OF_STRIPES], f
     }
 
     // set the new gain value for the next loop
-    amp.gain(*gain);
+    amp->gain(*gain);
 
     for (int gn = 0; gn < NUMBER_OF_STRIPES; gn++)
     {
@@ -78,7 +78,7 @@ void adjust_gain_1(float *bin_all, float *gain, float bins[NUMBER_OF_STRIPES], f
     }
 }
 
-void update_peaks_1(float *bin_all, AudioAnalyzePeak *peak_all, AudioAnalyzeFFT256 fft256, float bins[NUMBER_OF_STRIPES], float *gain, float stripe_maximums[NUMBER_OF_STRIPES], AudioAmplifier amp)
+void update_peaks_1(float *bin_all, AudioAnalyzePeak *peak_all, AudioAnalyzeFFT256 *fft256, float bins[NUMBER_OF_STRIPES], float *gain, float stripe_maximums[NUMBER_OF_STRIPES], AudioAmplifier *amp)
 {
     // update overall peak measurement
     float peak = *bin_all; // get the old value
@@ -108,25 +108,25 @@ void update_peaks_1(float *bin_all, AudioAnalyzePeak *peak_all, AudioAnalyzeFFT2
     }
 
     // same for fft values
-    if (fft256.available())
+    if (fft256->available())
     {
         // add to bins by hand
-        peak_bins[0] = fft256.read(1);
-        peak_bins[1] = fft256.read(2);
-        peak_bins[2] = fft256.read(3);
-        peak_bins[3] = fft256.read(4);
-        peak_bins[4] = fft256.read(5);
-        peak_bins[5] = fft256.read(6);
-        peak_bins[6] = fft256.read(7);
-        peak_bins[7] = fft256.read(8);
-        peak_bins[8] = fft256.read(9);
-        peak_bins[9] = fft256.read(10);
-        peak_bins[10] = fft256.read(11, 12);
-        peak_bins[11] = fft256.read(13, 14);
-        peak_bins[12] = fft256.read(15, 16);
-        peak_bins[13] = fft256.read(17, 20);
-        peak_bins[14] = fft256.read(21, 26);
-        peak_bins[15] = fft256.read(27, 30);
+        peak_bins[0] = fft256->read(1);
+        peak_bins[1] = fft256->read(2);
+        peak_bins[2] = fft256->read(3);
+        peak_bins[3] = fft256->read(4);
+        peak_bins[4] = fft256->read(5);
+        peak_bins[5] = fft256->read(6);
+        peak_bins[6] = fft256->read(7);
+        peak_bins[7] = fft256->read(8);
+        peak_bins[8] = fft256->read(9);
+        peak_bins[9] = fft256->read(10);
+        peak_bins[10] = fft256->read(11, 12);
+        peak_bins[11] = fft256->read(13, 14);
+        peak_bins[12] = fft256->read(15, 16);
+        peak_bins[13] = fft256->read(17, 20);
+        peak_bins[14] = fft256->read(21, 26);
+        peak_bins[15] = fft256->read(27, 30);
 
         adjust_gain_1(bin_all, gain, bins, stripe_maximums, amp);
     }

@@ -5,9 +5,9 @@
 
 #include <Audio.h>
 
-float hue_2 = 0.0;
+float hue_3 = 0.0;
 
-void adjust_gain_2(float *bin_all, float *gain, AudioAmplifier *amp)
+void adjust_gain_3(float *bin_all, float *gain, AudioAmplifier *amp, float stripe_maximums[NUMBER_OF_STRIPES], float *peak)
 {
     float maxpeak = *bin_all; // getmaxpeak(bins);
     // if the overall peak is too high, decrease amplification faster
@@ -36,9 +36,34 @@ void adjust_gain_2(float *bin_all, float *gain, AudioAmplifier *amp)
 
     // set the new gain value for the next loop
     amp->gain(*gain);
+
+    // update stripe maximum
+    // if the overall peak is too high, decrease amplification fasterk
+    if (*peak > stripe_maximums[0] * 0.95)
+    {
+        stripe_maximums[0] += 0.002;
+    }
+
+    // if the overall peak is too low, increase amplification slowly
+    if (*peak < stripe_maximums[0] * 0.3)
+    {
+        stripe_maximums[0] -= 0.0001;
+    }
+
+    // limit the maximum to 1, since the signal cannot be greater
+    if (stripe_maximums[0] > 1.0)
+    {
+        stripe_maximums[0] = 1.0;
+    }
+
+    // limit the minimum maximum (lol)
+    if (stripe_maximums[0] < 0.001)
+    {
+        stripe_maximums[0] = 0.001;
+    }
 }
 
-void update_peaks_2(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMBER_OF_STRIPES], float *gain, AudioAmplifier *amp)
+void update_peaks_3(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMBER_OF_STRIPES], float *gain, AudioAmplifier *amp, AudioAnalyzeFFT256 *fft256, float stripe_maximums[NUMBER_OF_STRIPES])
 {
     // update overall peak measurement
     float peak = *bin_all; // get the old value
@@ -48,7 +73,12 @@ void update_peaks_2(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMBE
     if (peak_all->available())
     {
         peak = peak_all->read();
-        adjust_gain_2(bin_all, gain, amp);
+    }
+
+    if (fft256->available())
+    {
+        float bass = fft256->read(0, 1);
+        adjust_gain_3(bin_all, gain, amp, stripe_maximums, &bass);
 
         // upate list
         for (int i = 0; i < NUMBER_OF_STRIPES - 1; i++)
@@ -57,7 +87,7 @@ void update_peaks_2(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMBE
         }
 
         // add new value at the end
-        bins[NUMBER_OF_STRIPES - 1] = peak;
+        bins[NUMBER_OF_STRIPES - 1] = bass;
     }
 
     // decay gain value
@@ -73,20 +103,20 @@ void update_peaks_2(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMBE
     }
 }
 
-void run_animation_2(RgbColor ledarray[NUMPIXELS], float bins[NUMBER_OF_STRIPES], int stripe_offsets[NUMBER_OF_STRIPES + 1])
+void run_animation_3(RgbColor ledarray[NUMPIXELS], float bins[NUMBER_OF_STRIPES], int stripe_offsets[NUMBER_OF_STRIPES + 1], float stripe_maximums[NUMBER_OF_STRIPES])
 {
     // prepare the color
     HsvColor hsvcol;
-    hue_2 += HUE_CHANGE_SPEED_SLOW; // increase hue value for rainbow effect
+    hue_3 += HUE_CHANGE_SPEED_SLOW; // increase hue value for rainbow effect
 
     // limit to 255
-    if (hue_2 > 255)
+    if (hue_3 > 255)
     {
-        hue_2 = 0;
+        hue_3 = 0;
     }
 
     // create hsv color
-    hsvcol.h = int(hue_2);
+    hsvcol.h = int(hue_3);
     hsvcol.s = 255;
     hsvcol.v = DEFAULT_BRIGHTNESS;
 
@@ -104,7 +134,7 @@ void run_animation_2(RgbColor ledarray[NUMPIXELS], float bins[NUMBER_OF_STRIPES]
     for (int stripenr = 0; stripenr < NUMBER_OF_STRIPES; stripenr++)
     {
         // how many leds to turn on depends on the peak value of the bin
-        int turnonnr = map(bins[stripenr], 0.2, 1.0, 1, LEDS_PER_STRIPE); // map to number of pixels // modulo to account for 3 strips only at the moment
+        int turnonnr = map(bins[stripenr], 0.0, stripe_maximums[0], 1, LEDS_PER_STRIPE); // map to number of pixels // modulo to account for 3 strips only at the moment
 
         // limit in case of unexpected input range
         if (turnonnr > LEDS_PER_STRIPE)
