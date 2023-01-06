@@ -55,9 +55,9 @@ RgbColor ledarray[NUMPIXELS];
 
 void printFloat(float value);
 
-void update_peaks(void);
-void run_animation(void);
-void adjust_gain(void);
+void update_peaks_1(void);
+void run_animation_1(void);
+void adjust_gain_1(void);
 
 void setup()
 {
@@ -78,9 +78,8 @@ void setup()
 void loop()
 {
     // run main functions
-    update_peaks();  // update peak values for all bins
-    run_animation(); // show on the led strips
-    adjust_gain();   // automatic gain adjustment
+    update_peaks_1();  // update peak values for all bins
+    run_animation_1(); // show on the led strips
 
 #ifdef DEBUG_PRINTS
     Serial.println();
@@ -111,7 +110,7 @@ float getmaxpeak(void)
     return maxp;
 }
 
-void adjust_gain(void)
+void adjust_gain_1(void)
 {
     float maxpeak = bin_all; // getmaxpeak();
     // if the overall peak is too high, decrease amplification faster
@@ -147,15 +146,15 @@ void adjust_gain(void)
     for (int gn = 0; gn < NUMBER_OF_STRIPES; gn++)
     {
         // if the overall peak is too high, decrease amplification faster
-        if (bins[gn] > stripe_maximums[gn])
+        if (bins[gn] > stripe_maximums[gn] * 0.9)
         {
-            stripe_maximums[gn] += 0.1;
+            stripe_maximums[gn] += 0.001;
         }
 
         // if the overall peak is too low, increase amplification slowly
-        if (bins[gn] < stripe_maximums[gn] / 4)
+        if (bins[gn] < stripe_maximums[gn] * 0.3)
         {
-            stripe_maximums[gn] -= 0.01;
+            stripe_maximums[gn] -= 0.0001;
         }
 
         // limit the maximum to 1, since the signal cannot be greater
@@ -165,14 +164,14 @@ void adjust_gain(void)
         }
 
         // limit the minimum maximum (lol)
-        if (stripe_maximums[gn] < 0.1)
+        if (stripe_maximums[gn] < 0.001)
         {
-            stripe_maximums[gn] = 0.1;
+            stripe_maximums[gn] = 0.001;
         }
     }
 }
 
-void update_peaks(void)
+void update_peaks_1(void)
 {
     // update overall peak measurement
     float peak = bin_all; // get the old value
@@ -209,6 +208,8 @@ void update_peaks(void)
         peak_bins[13] = fft256.read(17, 20);
         peak_bins[14] = fft256.read(21, 26);
         peak_bins[15] = fft256.read(27, 30);
+
+        adjust_gain_1();
     }
 
     // decay gain value
@@ -239,7 +240,7 @@ void update_peaks(void)
     // printFloat(bin_high);
 }
 
-void run_animation(void)
+void run_animation_1(void)
 {
     // prepare the color
     HsvColor hsvcol;
