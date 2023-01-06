@@ -6,6 +6,7 @@
 #include <animation_2.h>
 #include <animation_3.h>
 #include <animation_4.h>
+#include <animation_5.h>
 
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
 float stripe_maximums[NUMBER_OF_STRIPES] = {0.7, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.6, 0.2};
@@ -71,8 +72,12 @@ void loop()
     // run_animation_3(ledarray, bins, stripe_offsets, stripe_maximums);
 
     // wavefront of bass only, but centered
-    update_peaks_4(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
-    run_animation_4(ledarray, bins, stripe_offsets, stripe_maximums);
+    // update_peaks_4(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
+    // run_animation_4(ledarray, bins, stripe_offsets, stripe_maximums);
+
+    // wavefront of peak, but centered
+    update_peaks_5(&bin_all, &peak_all, bins, &gain, &amp);
+    run_animation_5(ledarray, bins, stripe_offsets);
 
     printFloat(gain);
     for (int i = 0; i < NUMBER_OF_STRIPES; i++)
