@@ -20,35 +20,35 @@ float getmaxpeak(float bins[NUMBER_OF_STRIPES])
     return maxp;
 }
 
-void adjust_gain_1(float bin_all, float gain, float bins[NUMBER_OF_STRIPES], float stripe_maximums[NUMBER_OF_STRIPES], AudioAmplifier amp)
+void adjust_gain_1(float *bin_all, float *gain, float bins[NUMBER_OF_STRIPES], float stripe_maximums[NUMBER_OF_STRIPES], AudioAmplifier amp)
 {
-    float maxpeak = bin_all; // getmaxpeak(bins);
+    float maxpeak = *bin_all; // getmaxpeak(bins);
     // if the overall peak is too high, decrease amplification faster
     if (maxpeak > 0.95)
     {
-        gain -= 0.2;
+        *gain -= 0.2;
     }
 
     // if the overall peak is too low, increase amplification slowly
     if (maxpeak < 0.6)
     {
-        gain += 0.1;
+        *gain += 0.1;
     }
 
     // limit the maximum gain
-    if (gain > MAXIMUM_GAIN)
+    if (*gain > MAXIMUM_GAIN)
     {
-        gain = MAXIMUM_GAIN;
+        *gain = MAXIMUM_GAIN;
     }
 
     // limit the minimum gain
-    if (gain < MINIMUM_GAIN)
+    if (*gain < MINIMUM_GAIN)
     {
-        gain = MINIMUM_GAIN;
+        *gain = MINIMUM_GAIN;
     }
 
     // set the new gain value for the next loop
-    amp.gain(gain);
+    amp.gain(*gain);
 
     for (int gn = 0; gn < NUMBER_OF_STRIPES; gn++)
     {
@@ -78,10 +78,10 @@ void adjust_gain_1(float bin_all, float gain, float bins[NUMBER_OF_STRIPES], flo
     }
 }
 
-void update_peaks_1(float bin_all, AudioAnalyzePeak peak_all, AudioAnalyzeFFT256 fft256, float bins[NUMBER_OF_STRIPES], float gain, float stripe_maximums[NUMBER_OF_STRIPES], AudioAmplifier amp)
+void update_peaks_1(float *bin_all, AudioAnalyzePeak *peak_all, AudioAnalyzeFFT256 fft256, float bins[NUMBER_OF_STRIPES], float *gain, float stripe_maximums[NUMBER_OF_STRIPES], AudioAmplifier amp)
 {
     // update overall peak measurement
-    float peak = bin_all; // get the old value
+    float peak = *bin_all; // get the old value
     float peak_bins[NUMBER_OF_STRIPES];
     for (int bn = 0; bn < NUMBER_OF_STRIPES; bn++)
     {
@@ -90,9 +90,21 @@ void update_peaks_1(float bin_all, AudioAnalyzePeak peak_all, AudioAnalyzeFFT256
 
     // if there is a new value available, read it
     // this one is required for gain adjustment
-    if (peak_all.available())
+    if (peak_all->available())
     {
-        peak = peak_all.read();
+        peak = peak_all->read();
+    }
+
+    // decay gain value
+    if (peak >= *bin_all)
+    {
+        // if the new peak value is higher than or equal to before
+        *bin_all = peak; // use the higher value
+    }
+    else
+    {
+        // if the new value is less than the old peak value
+        *bin_all = *bin_all - BEAT_DECAY; // decrease the peak slowly
     }
 
     // same for fft values
@@ -117,18 +129,6 @@ void update_peaks_1(float bin_all, AudioAnalyzePeak peak_all, AudioAnalyzeFFT256
         peak_bins[15] = fft256.read(27, 30);
 
         adjust_gain_1(bin_all, gain, bins, stripe_maximums, amp);
-    }
-
-    // decay gain value
-    if (peak >= bin_all)
-    {
-        // if the new peak value is higher than or equal to before
-        bin_all = peak; // use the higher value
-    }
-    else
-    {
-        // if the new value is less than the old peak value
-        bin_all = bin_all - BEAT_DECAY; // decrease the peak slowly
     }
 
     for (int bn = 0; bn < NUMBER_OF_STRIPES; bn++)

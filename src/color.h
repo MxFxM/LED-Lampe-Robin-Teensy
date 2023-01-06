@@ -1,3 +1,6 @@
+#ifndef __COLOR_DEF
+#define __COLOR_DEF
+
 typedef struct RgbColor
 {
     unsigned char r;
@@ -14,3 +17,4 @@ typedef struct HsvColor
 
 RgbColor HsvToRgb(HsvColor hsv);
 HsvColor RgbToHsv(RgbColor rgb);
+#endif

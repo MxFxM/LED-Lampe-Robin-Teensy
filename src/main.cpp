@@ -3,6 +3,7 @@
 #include <project_defs.h>
 
 #include <animation_1.h>
+#include <animation_2.h>
 
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
 float stripe_maximums[NUMBER_OF_STRIPES] = {0.7, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.6, 0.2};
@@ -56,8 +57,17 @@ void setup()
 void loop()
 {
     // run main functions
-    update_peaks_1(bin_all, peak_all, fft256, bins, gain, stripe_maximums, amp); // update peak values for all bins
-    run_animation_1(ledarray, bins, stripe_offsets, stripe_maximums);            // show on the led strips
+    update_peaks_1(&bin_all, &peak_all, fft256, bins, &gain, stripe_maximums, amp); // update peak values for all bins
+    run_animation_1(ledarray, bins, stripe_offsets, stripe_maximums);               // show on the led strips
+
+    // update_peaks_2(bin_all, peak_all, bins, gain, amp);
+    // run_animation_2(ledarray, bins, stripe_offsets);
+
+    printFloat(gain);
+    for (int i = 0; i < NUMBER_OF_STRIPES; i++)
+    {
+        printFloat(bins[i]);
+    }
 
 #ifdef DEBUG_PRINTS
     Serial.println();
