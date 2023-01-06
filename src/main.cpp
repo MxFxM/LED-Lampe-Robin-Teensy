@@ -49,7 +49,6 @@ AudioConnection patchCord3(amp, fft256);
 float bin_all = 0.0;
 float bins[NUMBER_OF_STRIPES];
 float gain = 20.0;
-float gains[NUMBER_OF_STRIPES];
 float hue = 0.0;
 
 RgbColor ledarray[NUMPIXELS];
@@ -69,11 +68,6 @@ void setup()
 
     // setup ws2812b leds
     leds.begin(); // begin serial driver
-
-    for (int gn = 0; gn < NUMBER_OF_STRIPES; gn++)
-    {
-        gains[gn] = 1.0;
-    }
 
 #ifdef DEBUG_PRINTS
     Serial.begin(115200);
@@ -199,22 +193,22 @@ void update_peaks(void)
     if (fft256.available())
     {
         // add to bins by hand
-        peak_bins[0] = fft256.read(1) * gains[0];
-        peak_bins[1] = fft256.read(2) * gains[1];
-        peak_bins[2] = fft256.read(3) * gains[2];
-        peak_bins[3] = fft256.read(4) * gains[3];
-        peak_bins[4] = fft256.read(5) * gains[4];
-        peak_bins[5] = fft256.read(6) * gains[5];
-        peak_bins[6] = fft256.read(7) * gains[6];
-        peak_bins[7] = fft256.read(8) * gains[7];
-        peak_bins[8] = fft256.read(9) * gains[8];
-        peak_bins[9] = fft256.read(10) * gains[9];
-        peak_bins[10] = fft256.read(11, 12) * gains[10];
-        peak_bins[11] = fft256.read(13, 14) * gains[11];
-        peak_bins[12] = fft256.read(15, 16) * gains[12];
-        peak_bins[13] = fft256.read(17, 20) * gains[13];
-        peak_bins[14] = fft256.read(21, 26) * gains[14];
-        peak_bins[15] = fft256.read(27, 30) * gains[15];
+        peak_bins[0] = fft256.read(1);
+        peak_bins[1] = fft256.read(2);
+        peak_bins[2] = fft256.read(3);
+        peak_bins[3] = fft256.read(4);
+        peak_bins[4] = fft256.read(5);
+        peak_bins[5] = fft256.read(6);
+        peak_bins[6] = fft256.read(7);
+        peak_bins[7] = fft256.read(8);
+        peak_bins[8] = fft256.read(9);
+        peak_bins[9] = fft256.read(10);
+        peak_bins[10] = fft256.read(11, 12);
+        peak_bins[11] = fft256.read(13, 14);
+        peak_bins[12] = fft256.read(15, 16);
+        peak_bins[13] = fft256.read(17, 20);
+        peak_bins[14] = fft256.read(21, 26);
+        peak_bins[15] = fft256.read(27, 30);
     }
 
     // decay gain value
