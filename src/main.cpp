@@ -60,12 +60,12 @@ void setup()
 void loop()
 {
     // fft bins
-    // update_peaks_1(&bin_all, &peak_all, &fft256, bins, &gain, stripe_maximums, &amp); // update peak values for all bins
-    // run_animation_1(ledarray, bins, stripe_offsets, stripe_maximums);               // show on the led strips
+    update_peaks_1(&bin_all, &peak_all, &fft256, bins, &gain, stripe_maximums, &amp); // update peak values for all bins
+    run_animation_1(ledarray, bins, stripe_offsets, stripe_maximums);                 // show on the led strips
 
     // wavefront of peak
-    update_peaks_2(&bin_all, &peak_all, bins, &gain, &amp);
-    run_animation_2(ledarray, bins, stripe_offsets);
+    // update_peaks_2(&bin_all, &peak_all, bins, &gain, &amp);
+    // run_animation_2(ledarray, bins, stripe_offsets);
 
     // wavefront of bass only
     // update_peaks_3(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
