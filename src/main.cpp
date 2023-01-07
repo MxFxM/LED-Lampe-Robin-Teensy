@@ -9,7 +9,7 @@
 #include <animation_5.h>
 
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
-float stripe_maximums[NUMBER_OF_STRIPES] = {0.7, 0.5, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.6, 0.2};
+float stripe_maximums[NUMBER_OF_STRIPES] = {0.4, 0.4, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.6, 0.2};
 
 #include <WS2812Serial.h>
 byte drawingMemory[NUMPIXELS * 3];         //  3 bytes per LED
