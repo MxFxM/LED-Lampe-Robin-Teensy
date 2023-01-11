@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Bounce.h>
 
 #include <project_defs.h>
 
@@ -41,6 +42,14 @@ float gain = 20.0;
 
 RgbColor ledarray[NUMPIXELS];
 
+#define LEFT_BUTTON_PIN 36
+#define RIGHT_BUTTON_PIN 37
+Bounce button_left = Bounce(LEFT_BUTTON_PIN, 10);
+Bounce button_right = Bounce(RIGHT_BUTTON_PIN, 10);
+
+#define RELAY_PIN 35
+bool use_wifi = true;
+
 void printFloat(float value);
 
 void setup()
@@ -53,6 +62,10 @@ void setup()
     // setup ws2812b leds
     leds.begin(); // begin serial driver
 
+    pinMode(LEFT_BUTTON_PIN, INPUT_PULLUP);
+    pinMode(RIGHT_BUTTON_PIN, INPUT_PULLUP);
+    pinMode(RELAY_PIN, OUTPUT);
+
 #ifdef DEBUG_PRINTS
     Serial.begin(115200);
     Serial.println("Hey");
@@ -61,6 +74,25 @@ void setup()
 
 void loop()
 {
+    // get button states
+    button_left.update();
+    if (button_right.update())
+    {
+        if (button_right.fallingEdge())
+        {
+            use_wifi = !use_wifi;
+        }
+    }
+
+    if (use_wifi)
+    {
+        digitalWriteFast(RELAY_PIN, LOW);
+    }
+    else
+    {
+        digitalWriteFast(RELAY_PIN, HIGH);
+    }
+
     // fft bins
     // update_peaks_1(&bin_all, &peak_all, &fft256, bins, &gain, stripe_maximums, &amp); // update peak values for all bins
     // run_animation_1(ledarray, bins, stripe_offsets, stripe_maximums);                 // show on the led strips
@@ -74,15 +106,15 @@ void loop()
     // run_animation_3(ledarray, bins, stripe_offsets, stripe_maximums);
 
     // wavefront of bass only, but centered
-    // update_peaks_4(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
-    // run_animation_4(ledarray, bins, stripe_offsets, stripe_maximums);
+    update_peaks_4(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
+    run_animation_4(ledarray, bins, stripe_offsets, stripe_maximums);
 
     // wavefront of peak, but centered
     // update_peaks_5(&bin_all, &peak_all, bins, &gain, &amp);
     // run_animation_5(ledarray, bins, stripe_offsets);
 
     // offset per stripe rainbow through all
-    run_animation_6(ledarray, stripe_offsets);
+    // run_animation_6(ledarray, stripe_offsets);
 
     // striped rainbow through all
     // run_animation_7(ledarray, stripe_offsets);
