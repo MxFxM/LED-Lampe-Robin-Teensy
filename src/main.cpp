@@ -3,6 +3,7 @@
 
 #include <project_defs.h>
 
+#define NUMBER_OF_ANIMATIONS 7
 #include <animation_1.h>
 #include <animation_2.h>
 #include <animation_3.h>
@@ -11,8 +12,10 @@
 #include <animation_6.h>
 #include <animation_7.h>
 
-int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
+int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072};         // need one more, since the last strip is inverted
+int stripe_offsets_default[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
 float stripe_maximums[NUMBER_OF_STRIPES] = {0.4, 0.4, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.6, 0.2};
+float stripe_maximums_default[NUMBER_OF_STRIPES] = {0.4, 0.4, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.6, 0.2};
 
 #include <WS2812Serial.h>
 byte drawingMemory[NUMPIXELS * 3];         //  3 bytes per LED
@@ -50,7 +53,10 @@ Bounce button_right = Bounce(RIGHT_BUTTON_PIN, 10);
 #define RELAY_PIN 35
 bool use_wifi = true;
 
+int animation_number = 1;
+
 void printFloat(float value);
+void reset(void);
 
 void setup()
 {
@@ -75,7 +81,19 @@ void setup()
 void loop()
 {
     // get button states
-    button_left.update();
+    if (button_left.update())
+    {
+        if (button_left.fallingEdge())
+        {
+            reset();
+            animation_number++;
+            if (animation_number > NUMBER_OF_ANIMATIONS)
+            {
+                animation_number = 1;
+            }
+        }
+    }
+
     if (button_right.update())
     {
         if (button_right.fallingEdge())
@@ -93,31 +111,45 @@ void loop()
         digitalWriteFast(RELAY_PIN, HIGH);
     }
 
-    // fft bins
-    // update_peaks_1(&bin_all, &peak_all, &fft256, bins, &gain, stripe_maximums, &amp); // update peak values for all bins
-    // run_animation_1(ledarray, bins, stripe_offsets, stripe_maximums);                 // show on the led strips
-
-    // wavefront of peak
-    // update_peaks_2(&bin_all, &peak_all, bins, &gain, &amp);
-    // run_animation_2(ledarray, bins, stripe_offsets);
-
-    // wavefront of bass only
-    // update_peaks_3(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
-    // run_animation_3(ledarray, bins, stripe_offsets, stripe_maximums);
-
-    // wavefront of bass only, but centered
-    update_peaks_4(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
-    run_animation_4(ledarray, bins, stripe_offsets, stripe_maximums);
-
-    // wavefront of peak, but centered
-    // update_peaks_5(&bin_all, &peak_all, bins, &gain, &amp);
-    // run_animation_5(ledarray, bins, stripe_offsets);
-
-    // offset per stripe rainbow through all
-    // run_animation_6(ledarray, stripe_offsets);
-
-    // striped rainbow through all
-    // run_animation_7(ledarray, stripe_offsets);
+    switch (animation_number)
+    {
+    case 1:
+        // fft bins
+        update_peaks_1(&bin_all, &peak_all, &fft256, bins, &gain, stripe_maximums, &amp); // update peak values for all bins
+        run_animation_1(ledarray, bins, stripe_offsets, stripe_maximums);                 // show on the led strips
+        break;
+    case 2:
+        // wavefront of peak
+        update_peaks_2(&bin_all, &peak_all, bins, &gain, &amp);
+        run_animation_2(ledarray, bins, stripe_offsets);
+        break;
+    case 3:
+        // wavefront of bass only
+        update_peaks_3(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
+        run_animation_3(ledarray, bins, stripe_offsets, stripe_maximums);
+        break;
+    case 4:
+        // wavefront of bass only, but centered
+        update_peaks_4(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
+        run_animation_4(ledarray, bins, stripe_offsets, stripe_maximums);
+        break;
+    case 5:
+        // wavefront of peak, but centered
+        update_peaks_5(&bin_all, &peak_all, bins, &gain, &amp);
+        run_animation_5(ledarray, bins, stripe_offsets);
+        break;
+    case 6:
+        // offset per stripe rainbow through all
+        run_animation_6(ledarray, stripe_offsets);
+        break;
+    case 7:
+        // striped rainbow through all
+        run_animation_7(ledarray, stripe_offsets);
+        break;
+    default:
+        reset();
+        animation_number = 1;
+    }
 
     printFloat(gain);
     for (int i = 0; i < NUMBER_OF_STRIPES; i++)
@@ -148,4 +180,27 @@ void printFloat(float value)
     Serial.print(value);
     Serial.print("\t");
 #endif
+}
+
+void reset(void)
+{
+    reset_1();
+    reset_2();
+    reset_3();
+    reset_4();
+    reset_5();
+    reset_6();
+    reset_7();
+
+    for (int i = 0; i < NUMBER_OF_STRIPES + 1; i++)
+    {
+        stripe_offsets[i] = stripe_offsets_default[i];
+    }
+    for (int i = 0; i < NUMBER_OF_STRIPES; i++)
+    {
+        stripe_maximums[i] = stripe_maximums_default[i];
+    }
+
+    gain = 20.0;
+    amp.gain(gain); // starting gain for automatic adjustment
 }

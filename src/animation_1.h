@@ -7,6 +7,11 @@
 
 float hue = 0.0;
 
+void reset_1(void)
+{
+    hue = 0.0;
+}
+
 float getmaxpeak(float bins[NUMBER_OF_STRIPES])
 {
     float maxp = 0;

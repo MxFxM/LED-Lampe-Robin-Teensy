@@ -7,6 +7,11 @@
 
 float hue_6 = 0.0;
 
+void reset_6(void)
+{
+    hue_6 = 0.0;
+}
+
 void run_animation_6(RgbColor ledarray[NUMPIXELS], int stripe_offsets[NUMBER_OF_STRIPES + 1])
 {
     // prepare the color

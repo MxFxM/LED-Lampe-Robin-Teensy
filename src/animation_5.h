@@ -7,6 +7,11 @@
 
 float hue_5 = 0.0;
 
+void reset_5(void)
+{
+    hue_5 = 0.0;
+}
+
 void adjust_gain_5(float *bin_all, float *gain, AudioAmplifier *amp)
 {
     float maxpeak = *bin_all; // getmaxpeak(bins);
