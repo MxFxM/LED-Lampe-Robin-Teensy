@@ -83,7 +83,7 @@ void adjust_gain_1(float *bin_all, float *gain, float bins[NUMBER_OF_STRIPES], f
     }
 }
 
-void update_peaks_1(float *bin_all, AudioAnalyzePeak *peak_all, AudioAnalyzeFFT256 *fft256, float bins[NUMBER_OF_STRIPES], float *gain, float stripe_maximums[NUMBER_OF_STRIPES], AudioAmplifier *amp)
+void update_peaks_1(float *bin_all, AudioAnalyzePeak *peak_all, AudioAnalyzeFFT1024 *fft1024, float bins[NUMBER_OF_STRIPES], float *gain, float stripe_maximums[NUMBER_OF_STRIPES], AudioAmplifier *amp)
 {
     // update overall peak measurement
     float peak = *bin_all; // get the old value
@@ -113,25 +113,25 @@ void update_peaks_1(float *bin_all, AudioAnalyzePeak *peak_all, AudioAnalyzeFFT2
     }
 
     // same for fft values
-    if (fft256->available())
+    if (fft1024->available())
     {
         // add to bins by hand
-        peak_bins[0] = fft256->read(1);
-        peak_bins[1] = fft256->read(2);
-        peak_bins[2] = fft256->read(3);
-        peak_bins[3] = fft256->read(4);
-        peak_bins[4] = fft256->read(5);
-        peak_bins[5] = fft256->read(6);
-        peak_bins[6] = fft256->read(7);
-        peak_bins[7] = fft256->read(8);
-        peak_bins[8] = fft256->read(9);
-        peak_bins[9] = fft256->read(10);
-        peak_bins[10] = fft256->read(11, 12);
-        peak_bins[11] = fft256->read(13, 14);
-        peak_bins[12] = fft256->read(15, 16);
-        peak_bins[13] = fft256->read(17, 20);
-        peak_bins[14] = fft256->read(21, 26);
-        peak_bins[15] = fft256->read(27, 30);
+        peak_bins[0] = fft1024->read(1, 4);      // was 1
+        peak_bins[1] = fft1024->read(5, 8);      // was 2
+        peak_bins[2] = fft1024->read(9, 12);     // was 3
+        peak_bins[3] = fft1024->read(13, 16);    // was 4
+        peak_bins[4] = fft1024->read(17, 20);    // was 5
+        peak_bins[5] = fft1024->read(21, 24);    // was 6
+        peak_bins[6] = fft1024->read(25, 28);    // was 7
+        peak_bins[7] = fft1024->read(29, 32);    // was 8
+        peak_bins[8] = fft1024->read(33, 36);    // was 9
+        peak_bins[9] = fft1024->read(37, 40);    // was 10
+        peak_bins[10] = fft1024->read(41, 48);   // was 11 to 12
+        peak_bins[11] = fft1024->read(49, 56);   // was 13 to 14
+        peak_bins[12] = fft1024->read(57, 64);   // was 15 to 16
+        peak_bins[13] = fft1024->read(65, 80);   // was 17 to 20
+        peak_bins[14] = fft1024->read(81, 104);  // was 21 to 26
+        peak_bins[15] = fft1024->read(105, 120); // was 27 to 30
 
         adjust_gain_1(bin_all, gain, bins, stripe_maximums, amp);
     }

@@ -29,14 +29,14 @@ WS2812Serial leds(NUMPIXELS, displayMemory, drawingMemory, LEDPIN, WS2812_GRB);
 #include <SerialFlash.h>
 
 // GUItool: begin automatically generated code
-AudioInputAnalog adc;      // xy=706,445
-AudioInputI2S i2s_timer;   // xy=708,340
-AudioAmplifier amp;        // xy=858,445
-AudioAnalyzeFFT256 fft256; // xy=1061,529
-AudioAnalyzePeak peak_all; // xy=1278,447
+AudioInputAnalog adc;        // xy=156,600
+AudioInputI2S i2s_timer;     // xy=309,430
+AudioAmplifier amp;          // xy=371,628
+AudioAnalyzePeak peak_all;   // xy=722,605
+AudioAnalyzeFFT1024 fft1024; // xy=734,559
 AudioConnection patchCord1(adc, amp);
 AudioConnection patchCord2(amp, peak_all);
-AudioConnection patchCord3(amp, fft256);
+AudioConnection patchCord3(amp, fft1024);
 // GUItool: end automatically generated code
 
 float bin_all = 0.0;
@@ -61,9 +61,9 @@ void reset(void);
 void setup()
 {
     // setup audio nodes
-    AudioMemory(1024);         // memory reserved
-    amp.gain(gain);            // starting gain for automatic adjustment
-    fft256.averageTogether(3); // with roughly 300 values per second, this still updates 60 times per second
+    AudioMemory(1024);          // memory reserved
+    amp.gain(gain);             // starting gain for automatic adjustment
+    fft1024.averageTogether(3); // with roughly 300 values per second, this still updates 60 times per second
 
     // setup ws2812b leds
     leds.begin(); // begin serial driver
@@ -115,8 +115,8 @@ void loop()
     {
     case 1:
         // fft bins
-        update_peaks_1(&bin_all, &peak_all, &fft256, bins, &gain, stripe_maximums, &amp); // update peak values for all bins
-        run_animation_1(ledarray, bins, stripe_offsets, stripe_maximums);                 // show on the led strips
+        update_peaks_1(&bin_all, &peak_all, &fft1024, bins, &gain, stripe_maximums, &amp); // update peak values for all bins
+        run_animation_1(ledarray, bins, stripe_offsets, stripe_maximums);                  // show on the led strips
         break;
     case 2:
         // wavefront of peak
@@ -125,12 +125,12 @@ void loop()
         break;
     case 3:
         // wavefront of bass only
-        update_peaks_3(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
+        update_peaks_3(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
         run_animation_3(ledarray, bins, stripe_offsets, stripe_maximums);
         break;
     case 4:
         // wavefront of bass only, but centered
-        update_peaks_4(&bin_all, &peak_all, bins, &gain, &amp, &fft256, stripe_maximums);
+        update_peaks_4(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
         run_animation_4(ledarray, bins, stripe_offsets, stripe_maximums);
         break;
     case 5:

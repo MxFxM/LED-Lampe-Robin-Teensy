@@ -68,7 +68,7 @@ void adjust_gain_3(float *bin_all, float *gain, AudioAmplifier *amp, float strip
     }
 }
 
-void update_peaks_3(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMBER_OF_STRIPES], float *gain, AudioAmplifier *amp, AudioAnalyzeFFT256 *fft256, float stripe_maximums[NUMBER_OF_STRIPES])
+void update_peaks_3(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMBER_OF_STRIPES], float *gain, AudioAmplifier *amp, AudioAnalyzeFFT1024 *fft1024, float stripe_maximums[NUMBER_OF_STRIPES])
 {
     // update overall peak measurement
     float peak = *bin_all; // get the old value
@@ -80,9 +80,9 @@ void update_peaks_3(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMBE
         peak = peak_all->read();
     }
 
-    if (fft256->available())
+    if (fft1024->available())
     {
-        float bass = fft256->read(0, 1);
+        float bass = fft1024->read(0, 4);
         adjust_gain_3(bin_all, gain, amp, stripe_maximums, &bass);
 
         // upate list
