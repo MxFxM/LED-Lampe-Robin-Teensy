@@ -3,7 +3,7 @@
 
 #include <project_defs.h>
 
-#define NUMBER_OF_ANIMATIONS 7
+#define NUMBER_OF_ANIMATIONS 8
 #include <animation_1.h>
 #include <animation_2.h>
 #include <animation_3.h>
@@ -11,6 +11,7 @@
 #include <animation_5.h>
 #include <animation_6.h>
 #include <animation_7.h>
+#include <animation_8.h>
 
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072};         // need one more, since the last strip is inverted
 int stripe_offsets_default[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
@@ -145,6 +146,11 @@ void loop()
     case 7:
         // striped rainbow through all
         run_animation_7(ledarray, stripe_offsets);
+        break;
+    case 8:
+        // fft bins, but only 43 Hz per bin and only up to 700 Hz at all
+        update_peaks_8(&bin_all, &peak_all, &fft1024, bins, &gain, stripe_maximums, &amp); // update peak values for all bins
+        run_animation_8(ledarray, bins, stripe_offsets, stripe_maximums);                  // show on the led strips
         break;
     default:
         reset();
