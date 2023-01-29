@@ -3,7 +3,7 @@
 
 #include <project_defs.h>
 
-#define NUMBER_OF_ANIMATIONS 8
+#define NUMBER_OF_ANIMATIONS 12
 #include <animation_1.h>
 #include <animation_2.h>
 #include <animation_3.h>
@@ -12,11 +12,18 @@
 #include <animation_6.h>
 #include <animation_7.h>
 #include <animation_8.h>
+#include <animation_9.h>
+#include <animation_10.h>
+#include <animation_11.h>
+#include <animation_12.h>
 
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072};         // need one more, since the last strip is inverted
 int stripe_offsets_default[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
 float stripe_maximums[NUMBER_OF_STRIPES] = {0.4, 0.4, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.6, 0.2};
 float stripe_maximums_default[NUMBER_OF_STRIPES] = {0.4, 0.4, 0.4, 0.4, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.6, 0.2};
+
+//                                                   left, right
+float scaling3d[NUMBER_OF_STRIPES] = {1, 0.9, 0.7, 0.6, 0.5, 0.3, 0.2, 0.1, 0.1, 0.2, 0.3, 0.5, 0.6, 0.7, 0.9, 1};
 
 #include <WS2812Serial.h>
 byte drawingMemory[NUMPIXELS * 3];         //  3 bytes per LED
@@ -52,7 +59,7 @@ Bounce button_left = Bounce(LEFT_BUTTON_PIN, 10);
 Bounce button_right = Bounce(RIGHT_BUTTON_PIN, 10);
 
 #define RELAY_PIN 35
-bool use_wifi = true;
+bool use_wifi = false;
 
 int animation_number = 1;
 
@@ -152,6 +159,26 @@ void loop()
         update_peaks_8(&bin_all, &peak_all, &fft1024, bins, &gain, stripe_maximums, &amp); // update peak values for all bins
         run_animation_8(ledarray, bins, stripe_offsets, stripe_maximums);                  // show on the led strips
         break;
+    case 9:
+        // wavefront of bass only, coming from the center outwards
+        update_peaks_9(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
+        run_animation_9(ledarray, bins, stripe_offsets, stripe_maximums);
+        break;
+    case 10:
+        // wavefront of bass only, coming from the center outwards, being smaller in the center to make a 3D effect
+        update_peaks_10(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
+        run_animation_10(ledarray, bins, stripe_offsets, stripe_maximums, scaling3d);
+        break;
+    case 11:
+        // wavefront of bass only, coming from the center outwards, being smaller in the center to make a 3D effect, with lines
+        update_peaks_11(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
+        run_animation_11(ledarray, bins, stripe_offsets, stripe_maximums, scaling3d);
+        break;
+    case 12:
+        // wavefront of bass only, coming from the center outwards, brightness modulated by current base
+        update_peaks_9(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
+        run_animation_9(ledarray, bins, stripe_offsets, stripe_maximums);
+        break;
     default:
         reset();
         animation_number = 1;
@@ -197,6 +224,11 @@ void reset(void)
     reset_5();
     reset_6();
     reset_7();
+    reset_8();
+    reset_9();
+    reset_10();
+    reset_11();
+    reset_12();
 
     for (int i = 0; i < NUMBER_OF_STRIPES + 1; i++)
     {
