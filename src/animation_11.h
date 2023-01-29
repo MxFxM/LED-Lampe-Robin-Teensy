@@ -195,7 +195,7 @@ void run_animation_11(RgbColor ledarray[NUMPIXELS], float bins[NUMBER_OF_STRIPES
         }
 
         // static lines
-        int limit = int((LEDS_PER_STRIPE - LEDS_PER_STRIPE * scaling3d[stripenr]) / 2) - 5;
+        int limit = int((LEDS_PER_STRIPE - LEDS_PER_STRIPE * scaling3d[stripenr]) / 2) - 3;
 
         if (limit <= 0)
         {
