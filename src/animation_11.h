@@ -5,14 +5,14 @@
 
 #include <Audio.h>
 
-float hue_10 = 0.0;
+float hue_11 = 0.0;
 
-void reset_10(void)
+void reset_11(void)
 {
-    hue_10 = 0.0;
+    hue_11 = 0.0;
 }
 
-void adjust_gain_10(float *bin_all, float *gain, AudioAmplifier *amp, float stripe_maximums[NUMBER_OF_STRIPES], float *peak)
+void adjust_gain_11(float *bin_all, float *gain, AudioAmplifier *amp, float stripe_maximums[NUMBER_OF_STRIPES], float *peak)
 {
     float maxpeak = *bin_all; // getmaxpeak(bins);
     // if the overall peak is too high, decrease amplification faster
@@ -68,7 +68,7 @@ void adjust_gain_10(float *bin_all, float *gain, AudioAmplifier *amp, float stri
     }
 }
 
-void update_peaks_10(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMBER_OF_STRIPES], float *gain, AudioAmplifier *amp, AudioAnalyzeFFT1024 *fft1024, float stripe_maximums[NUMBER_OF_STRIPES])
+void update_peaks_11(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMBER_OF_STRIPES], float *gain, AudioAmplifier *amp, AudioAnalyzeFFT1024 *fft1024, float stripe_maximums[NUMBER_OF_STRIPES])
 {
     // update overall peak measurement
     float peak = *bin_all; // get the old value
@@ -83,7 +83,7 @@ void update_peaks_10(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMB
     if (fft1024->available())
     {
         float bass = fft1024->read(0, 4);
-        adjust_gain_10(bin_all, gain, amp, stripe_maximums, &bass);
+        adjust_gain_11(bin_all, gain, amp, stripe_maximums, &bass);
 
         // 16 stripes
         // 0 to 7 flow towards the smaller index, so index 0 = previous 1
@@ -123,25 +123,32 @@ void update_peaks_10(float *bin_all, AudioAnalyzePeak *peak_all, float bins[NUMB
     }
 }
 
-void run_animation_10(RgbColor ledarray[NUMPIXELS], float bins[NUMBER_OF_STRIPES], int stripe_offsets[NUMBER_OF_STRIPES + 1], float stripe_maximums[NUMBER_OF_STRIPES], float scaling3d[NUMBER_OF_STRIPES])
+void run_animation_11(RgbColor ledarray[NUMPIXELS], float bins[NUMBER_OF_STRIPES], int stripe_offsets[NUMBER_OF_STRIPES + 1], float stripe_maximums[NUMBER_OF_STRIPES], float scaling3d[NUMBER_OF_STRIPES])
 {
     // prepare the color
     HsvColor hsvcol;
-    hue_10 += HUE_CHANGE_SPEED_SLOW; // increase hue value for rainbow effect
+    HsvColor hsvcol_mod;
+    hue_11 += HUE_CHANGE_SPEED_SLOW; // increase hue value for rainbow effect
 
     // limit to 255
-    if (hue_10 > 255)
+    if (hue_11 > 255)
     {
-        hue_10 = 0;
+        hue_11 = 0;
     }
 
     // create hsv color
-    hsvcol.h = int(hue_10);
+    hsvcol.h = int(hue_11);
     hsvcol.s = 255;
     hsvcol.v = DEFAULT_BRIGHTNESS;
 
+    // create modulated hsv color
+    hsvcol_mod.h = int(hue_11);
+    hsvcol_mod.s = 255;
+    hsvcol_mod.v = int(DEFAULT_BRIGHTNESS * bins[int(NUMBER_OF_STRIPES / 2)]);
+
     // convert to rgb
     RgbColor rgbcol = HsvToRgb(hsvcol);
+    RgbColor rgbcol_mod = HsvToRgb(hsvcol_mod);
 
     // turn off led brightness
     for (int i = 0; i < NUMPIXELS; i++)
@@ -185,6 +192,19 @@ void run_animation_10(RgbColor ledarray[NUMPIXELS], float bins[NUMBER_OF_STRIPES
                 ledarray[stripe_offsets[stripenr + 1] - i - 1 - int(LEDS_PER_STRIPE / 2)] = rgbcol;
                 ledarray[stripe_offsets[stripenr + 1] + i - 1 - int(LEDS_PER_STRIPE / 2)] = rgbcol;
             }
+        }
+
+        // static lines
+        int limit = int((LEDS_PER_STRIPE - LEDS_PER_STRIPE * scaling3d[stripenr]) / 2) - 5;
+
+        if (limit <= 0)
+        {
+            limit = 0;
+        }
+        for (int i = 0; i < limit; i++)
+        {
+            ledarray[stripe_offsets[stripenr] + i] = rgbcol_mod;
+            ledarray[stripe_offsets[stripenr + 1] - i - 1] = rgbcol_mod;
         }
     }
 }
