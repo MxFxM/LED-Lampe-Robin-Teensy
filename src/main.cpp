@@ -3,7 +3,7 @@
 
 #include <project_defs.h>
 
-#define NUMBER_OF_ANIMATIONS 12
+#define NUMBER_OF_ANIMATIONS 13
 #include <animation_1.h>
 #include <animation_2.h>
 #include <animation_3.h>
@@ -16,6 +16,7 @@
 #include <animation_10.h>
 #include <animation_11.h>
 #include <animation_12.h>
+#include <animation_13.h>
 
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072};         // need one more, since the last strip is inverted
 int stripe_offsets_default[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
@@ -61,7 +62,7 @@ Bounce button_right = Bounce(RIGHT_BUTTON_PIN, 10);
 #define RELAY_PIN 35
 bool use_wifi = false;
 
-int animation_number = 1;
+int animation_number = 13;
 
 void printFloat(float value);
 void reset(void);
@@ -179,6 +180,11 @@ void loop()
         update_peaks_9(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
         run_animation_9(ledarray, bins, stripe_offsets, stripe_maximums);
         break;
+    case 13:
+        // wavefront of bass only, coming from the center outwards, color modulated by current base
+        update_peaks_13(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
+        run_animation_13(ledarray, bins, stripe_offsets, stripe_maximums);
+        break;
     default:
         reset();
         animation_number = 1;
@@ -229,6 +235,7 @@ void reset(void)
     reset_10();
     reset_11();
     reset_12();
+    reset_13();
 
     for (int i = 0; i < NUMBER_OF_STRIPES + 1; i++)
     {
