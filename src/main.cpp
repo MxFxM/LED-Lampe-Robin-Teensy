@@ -3,7 +3,7 @@
 
 #include <project_defs.h>
 
-#define NUMBER_OF_ANIMATIONS 14
+#define NUMBER_OF_ANIMATIONS 16
 #include <animation_1.h>
 #include <animation_2.h>
 #include <animation_3.h>
@@ -18,6 +18,8 @@
 #include <animation_12.h>
 #include <animation_13.h>
 #include <animation_14.h>
+#include <animation_15.h>
+#include <animation_16.h>
 
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072};         // need one more, since the last strip is inverted
 int stripe_offsets_default[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
@@ -63,7 +65,7 @@ Bounce button_right = Bounce(RIGHT_BUTTON_PIN, 10);
 #define RELAY_PIN 35
 bool use_wifi = false;
 
-int animation_number = 14;
+int animation_number = NUMBER_OF_ANIMATIONS;
 
 void printFloat(float value);
 void reset(void);
@@ -191,16 +193,26 @@ void loop()
         update_peaks_14(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
         run_animation_14(ledarray, bins, stripe_offsets, stripe_maximums);
         break;
+    case 15:
+        // wavefront of bass only, coming from the bottom up
+        update_peaks_15(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
+        run_animation_15(ledarray, bins, stripe_offsets, stripe_maximums);
+        break;
+    case 16:
+        // wavefront of bass only, coming from the bottom up, 6 times faster
+        update_peaks_16(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
+        run_animation_16(ledarray, bins, stripe_offsets, stripe_maximums);
+        break;
     default:
         reset();
         animation_number = 1;
     }
 
-    printFloat(gain);
-    for (int i = 0; i < NUMBER_OF_STRIPES; i++)
-    {
-        printFloat(bins[i]);
-    }
+    // printFloat(gain);
+    // for (int i = 0; i < NUMBER_OF_STRIPES; i++)
+    //{
+    //     printFloat(bins[i]);
+    // }
 
 #ifdef DEBUG_PRINTS
     Serial.println();
@@ -243,6 +255,8 @@ void reset(void)
     reset_12();
     reset_13();
     reset_14();
+    reset_15();
+    reset_16();
 
     for (int i = 0; i < NUMBER_OF_STRIPES + 1; i++)
     {
