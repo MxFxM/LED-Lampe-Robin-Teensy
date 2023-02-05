@@ -3,7 +3,7 @@
 
 #include <project_defs.h>
 
-#define NUMBER_OF_ANIMATIONS 17
+#define NUMBER_OF_ANIMATIONS 18
 #include <animation_1.h>
 #include <animation_2.h>
 #include <animation_3.h>
@@ -21,6 +21,7 @@
 #include <animation_15.h>
 #include <animation_16.h>
 #include <animation_17.h>
+#include <animation_18.h>
 
 int stripe_offsets[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072};         // need one more, since the last strip is inverted
 int stripe_offsets_default[NUMBER_OF_STRIPES + 1] = {0, 67, 134, 201, 268, 335, 402, 469, 536, 603, 670, 737, 804, 871, 938, 1005, 1072}; // need one more, since the last strip is inverted
@@ -209,6 +210,11 @@ void loop()
         update_peaks_17(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
         run_animation_17(ledarray, bins, stripe_offsets, stripe_maximums);
         break;
+    case 18:
+        // wavefront of bass only, coming from the center outwards elliptical, rainbow colors
+        update_peaks_18(&bin_all, &peak_all, bins, &gain, &amp, &fft1024, stripe_maximums);
+        run_animation_18(ledarray, bins, stripe_offsets, stripe_maximums);
+        break;
     default:
         reset();
         animation_number = 1;
@@ -264,6 +270,7 @@ void reset(void)
     reset_15();
     reset_16();
     reset_17();
+    reset_18();
 
     for (int i = 0; i < NUMBER_OF_STRIPES + 1; i++)
     {
